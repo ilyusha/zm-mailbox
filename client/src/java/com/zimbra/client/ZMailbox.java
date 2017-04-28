@@ -3709,6 +3709,9 @@ public class ZMailbox implements ToZJSONObject, MailboxStore {
         if (params.getIncludeTagDeleted()) {
             req.addAttribute(MailConstants.A_INCLUDE_TAG_DELETED, true);
         }
+        if (params.getZimbraFetchMode() != null) {
+            req.addAttribute(MailConstants.A_RESULT_MODE, params.getZimbraFetchMode().toString());
+        }
 
         req.addAttribute(MailConstants.E_QUERY, params.getQuery(), Element.Disposition.CONTENT);
 
