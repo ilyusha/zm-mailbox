@@ -55,12 +55,6 @@ public class TestRemoteImapShared extends SharedImapTests {
     }
 
     @Override
-    @Ignore ("failing on remote imap for now")
-    public void testAppendTags() throws Exception {
-
-    }
-
-    @Override
     public void testStoreTagsDirty() throws Exception {
 
     }
