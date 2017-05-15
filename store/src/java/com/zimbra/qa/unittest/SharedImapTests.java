@@ -646,7 +646,7 @@ public abstract class SharedImapTests {
         connection = connectAndSelectInbox();
         Assert.assertTrue("expecting UIDPLUS capability", connection.hasCapability("UIDPLUS"));
         Flags flags = Flags.fromSpec("afs");
-        flags.add(new Atom(tag.getId()));
+        flags.add(new Atom(tag.getName()));
         Date date = new Date(System.currentTimeMillis());
         Literal msg = message(100000);
         try {
