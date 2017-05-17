@@ -108,6 +108,7 @@ import com.zimbra.common.soap.Element.XMLElement;
 import com.zimbra.common.soap.SoapFaultException;
 import com.zimbra.common.soap.SoapHttpTransport;
 import com.zimbra.common.soap.SoapTransport;
+import com.zimbra.common.soap.SoapTransport.NotificationFormat;
 import com.zimbra.common.util.ByteUtil;
 import com.zimbra.common.util.CliUtil;
 import com.zimbra.common.util.StringUtil;
@@ -858,7 +859,15 @@ public class TestUtil extends Assert {
         return getZMailbox(username, null);
     }
 
-    public static ZMailbox getZMailbox(String username, String twoFactorCode, TrustedStatus trusted)
+    public static ZMailbox getZMailboxImap(String username) throws ServiceException {
+        return getZMailbox(username, null, TrustedStatus.not_trusted, true);
+    }
+
+    public static ZMailbox getZMailbox(String username, String twoFactorCode, TrustedStatus trusted) throws ServiceException {
+        return getZMailbox(username, twoFactorCode, trusted, false);
+    }
+
+    private static ZMailbox getZMailbox(String username, String twoFactorCode, TrustedStatus trusted, boolean imap)
             throws ServiceException {
         ZMailbox.Options options = new ZMailbox.Options();
         options.setAccount(getAddress(username));
@@ -870,6 +879,9 @@ public class TestUtil extends Assert {
         }
         if (trusted == TrustedStatus.trusted) {
             options.setTrustedDevice(true);
+        }
+        if (imap) {
+            options.setNotificationFormat(NotificationFormat.IMAP);
         }
         return ZMailbox.getMailbox(options);
     }
