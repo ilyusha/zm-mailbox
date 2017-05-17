@@ -964,7 +964,7 @@ public abstract class SharedImapTests {
         }
 
         //should not have created a visible tag
-        ZMailbox mbox = TestUtil.getZMailbox(USER);
+        ZMailbox mbox = TestUtil.getZMailboxImap(USER);
         List<ZTag> tags = mbox.getAllTags();
         Assert.assertTrue("APPEND created new visible tag", tags == null || tags.size() == 0);
 
@@ -1290,7 +1290,7 @@ public abstract class SharedImapTests {
             Assert.assertTrue("expecting connection to be closed", connection.isClosed());
         }
     }
-    
+
     @Test
     public void testLsubThrottle() throws IOException {
         connection = connectAndSelectInbox();
