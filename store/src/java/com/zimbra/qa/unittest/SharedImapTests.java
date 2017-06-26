@@ -32,12 +32,14 @@ import com.zimbra.client.ZFolder;
 import com.zimbra.client.ZMailbox;
 import com.zimbra.client.ZTag;
 import com.zimbra.client.ZTag.Color;
+import com.zimbra.common.account.Key.CacheEntryBy;
 import com.zimbra.common.localconfig.LC;
 import com.zimbra.common.mime.MimeConstants;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.AccessBoundedRegex;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Provisioning;
+import com.zimbra.cs.account.Provisioning.CacheEntry;
 import com.zimbra.cs.mailbox.Mailbox;
 import com.zimbra.cs.mailclient.CommandFailedException;
 import com.zimbra.cs.mailclient.imap.AppendMessage;
@@ -59,6 +61,7 @@ import com.zimbra.cs.mailclient.imap.MailboxName;
 import com.zimbra.cs.mailclient.imap.MessageData;
 import com.zimbra.cs.mailclient.imap.ResponseHandler;
 import com.zimbra.cs.service.formatter.VCard;
+import com.zimbra.soap.admin.type.CacheEntryType;
 
 /**
  * Definitions of tests used from {@Link TestLocalImapShared} and {@Link TestRemoteImapShared}
@@ -510,7 +513,11 @@ public abstract class SharedImapTests extends ImapTestBase {
         ZMailbox mbox = TestUtil.getZMailbox(USER);
         String folderName = "newfolder1";
         mbox.createFolder(Mailbox.ID_FOLDER_USER_ROOT+"", folderName, ZFolder.View.unknown, ZFolder.Color.DEFAULTCOLOR, null, null);
-        Provisioning.getInstance().getLocalServer().setImapDisplayMailFoldersOnly(true);
+        Provisioning prov = Provisioning.getInstance();
+        prov.getLocalServer().setImapDisplayMailFoldersOnly(true);
+        CacheEntry[] entries = new CacheEntry[1];
+        entries[0] = new CacheEntry(CacheEntryBy.id, prov.getLocalServer().getId());
+        Provisioning.getInstance().flushCache(CacheEntryType.server, entries);
         connection = connectAndSelectInbox();
         List<ListData> listResult = connection.list("", "*");
         assertNotNull("list result should not be null", listResult);
