@@ -523,7 +523,7 @@ public abstract class ImapHandler {
                     CacheEntryType cacheType;
                     CacheEntryBy cacheBy = null;
                     List<String> entries = new ArrayList<String>();
-                    String cacheTypeStr = req.readSequence();
+                    String cacheTypeStr = req.readAstring();
                     try {
                         cacheType = CacheEntryType.fromString(cacheTypeStr);
                     } catch (ServiceException e) {
@@ -532,7 +532,7 @@ public abstract class ImapHandler {
                     if (!req.eof()) {
                         //should be followed up by entryBy and list of entries
                         req.skipSpace();
-                        String cacheByStr = req.readSequence();
+                        String cacheByStr = req.readAstring();
                         try {
                             cacheBy = CacheEntryBy.fromString(cacheByStr);
                         } catch (ServiceException e) {
@@ -540,7 +540,7 @@ public abstract class ImapHandler {
                         }
                         do {
                             req.skipSpace();
-                            entries.add(req.readSequence());
+                            entries.add(req.readAstring());
                         }
                         while (!req.eof());
                     }
