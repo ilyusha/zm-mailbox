@@ -1328,6 +1328,12 @@ public abstract class ImapHandler {
     }
 
     boolean doFLUSHCACHE(String tag) throws IOException {
+        if (!checkState(tag, State.AUTHENTICATED)) {
+            return true;
+        } else if (authenticator == null || !authenticator.getMechanism().equals(ZimbraAuthenticator.MECHANISM)) {
+            sendNO(tag, "must be authenticated with X-ZIMBRA auth mechanism");
+            return true;
+        }
         try {
             Provisioning.getInstance().flushCache(CacheEntryType.config, null);
             sendOK(tag, "FLUSHCACHE completed");
