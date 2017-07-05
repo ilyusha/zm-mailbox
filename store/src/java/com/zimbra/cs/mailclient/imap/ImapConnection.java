@@ -730,13 +730,9 @@ public final class ImapConnection extends MailConnection {
             config.getHost(), config.getPort(), config.getSecurity(), state, mailbox == null ? "null" : mailbox.getName());
     }
 
-    public void flushConfigCache() throws IOException {
-        ImapRequest req = newRequest(CAtom.FLUSHCACHE, CacheEntryType.config);
+    public void flushCache(CacheEntryType type) throws IOException {
+        ImapRequest req = newRequest(CAtom.FLUSHCACHE, type);
         req.sendCheckStatus();
-    }
-
-    public void flushAccountCache(CacheEntryBy by, String... accounts) throws IOException {
-        flushCache(CacheEntryType.account, by, accounts);
     }
 
     public void flushCache(CacheEntryType type, CacheEntryBy by, String... entries) throws IOException {

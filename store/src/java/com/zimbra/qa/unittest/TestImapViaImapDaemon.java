@@ -19,6 +19,7 @@ import com.zimbra.cs.mailclient.imap.ImapConfig;
 import com.zimbra.cs.mailclient.imap.ImapConnection;
 import com.zimbra.cs.security.sasl.ZimbraAuthenticator;
 import com.zimbra.cs.service.AuthProvider;
+import com.zimbra.soap.admin.type.CacheEntryType;
 
 /**
  * Test the IMAP server provided by the IMAP daemon, doing the necessary configuration to make it work.
@@ -64,7 +65,7 @@ public class TestImapViaImapDaemon extends SharedImapTests {
         connection = new ImapConnection(config);
         connection.connect();
         connection.authenticate(AuthProvider.getAuthToken(acct).getEncoded());
-        connection.flushConfigCache();
-        connection.flushAccountCache(CacheEntryBy.name, USER, USER);
+        connection.flushCache(CacheEntryType.account, CacheEntryBy.name, USER, USER);
+        connection.flushCache(CacheEntryType.config);
     }
 }
