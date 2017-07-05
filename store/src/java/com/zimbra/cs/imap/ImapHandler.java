@@ -107,6 +107,7 @@ import com.zimbra.cs.service.mail.FolderAction;
 import com.zimbra.cs.service.util.ItemId;
 import com.zimbra.cs.util.AccountUtil;
 import com.zimbra.cs.util.BuildInfo;
+import com.zimbra.soap.admin.type.CacheEntryType;
 
 public abstract class ImapHandler {
     enum State { NOT_AUTHENTICATED, AUTHENTICATED, SELECTED, LOGOUT }
@@ -515,6 +516,8 @@ public abstract class ImapHandler {
                     }
                     checkEOF(tag, req);
                     return isProxied ? imapProxy.proxy(req) : doFETCH(tag, sequence, attributes, parts, byUID, modseq);
+                } else if (command.equals("FLUSHCACHE")) {
+                    return doFLUSHCACHE(tag);
                 }
                 break;
             case 'G':
@@ -1322,6 +1325,17 @@ public abstract class ImapHandler {
         }
         sendOK(tag, "LOGOUT completed");
         return false;
+    }
+
+    boolean doFLUSHCACHE(String tag) throws IOException {
+        try {
+            Provisioning.getInstance().flushCache(CacheEntryType.config, null);
+            sendOK(tag, "FLUSHCACHE completed");
+            return true;
+        } catch (ServiceException e) {
+            ZimbraLog.imap.error("error flushing cache on IMAP server", e);
+            return canContinue(e);
+        }
     }
 
     boolean doAUTHENTICATE(String tag, String mechanism, byte[] initial) throws IOException {
