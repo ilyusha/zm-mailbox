@@ -739,7 +739,12 @@ public final class ImapConnection extends MailConnection {
     }
 
     public void flushCache(CacheEntryType type, CacheEntryBy by, String... entries) throws IOException {
-        ImapRequest req = newRequest(CAtom.FLUSHCACHE, type, by, entries);
+        ImapRequest req;
+        if (by == null) {
+            req = newRequest(CAtom.FLUSHCACHE, type, entries);
+        } else {
+            req = newRequest(CAtom.FLUSHCACHE, type, by, entries);
+        }
         req.sendCheckStatus();
     }
 }
