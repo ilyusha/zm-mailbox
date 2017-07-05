@@ -544,8 +544,6 @@ public abstract class ImapHandler {
                         }
                         while (!req.eof());
                     }
-                    if (req.eof())
-                    req.skipSpace();
                     return doFLUSHCACHE(tag, cacheType, cacheBy, entries);
                 }
                 break;
