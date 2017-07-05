@@ -65,7 +65,7 @@ public class TestImapViaImapDaemon extends SharedImapTests {
         connection = new ImapConnection(config);
         connection.connect();
         connection.authenticate(AuthProvider.getAuthToken(acct).getEncoded());
-        connection.flushCache(CacheEntryType.account, CacheEntryBy.name, USER, USER);
+        connection.flushCache(CacheEntryType.account, CacheEntryBy.name, acct.getName(), acct.getName());
         connection.flushCache(CacheEntryType.config);
     }
 }
