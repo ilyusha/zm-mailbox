@@ -1,5 +1,8 @@
 package com.zimbra.qa.unittest;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 
 import org.dom4j.DocumentException;
@@ -14,6 +17,7 @@ import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.Log;
 import com.zimbra.cs.account.Account;
 import com.zimbra.cs.imap.ImapProxy.ZimbraClientAuthenticator;
+import com.zimbra.cs.mailclient.CommandFailedException;
 import com.zimbra.cs.mailclient.auth.AuthenticatorFactory;
 import com.zimbra.cs.mailclient.imap.ImapConfig;
 import com.zimbra.cs.mailclient.imap.ImapConnection;
@@ -49,6 +53,24 @@ public class TestImapViaImapDaemon extends SharedImapTests {
     @Override
     protected int getImapPort() {
         return imapServer.getRemoteImapBindPort();
+    }
+
+    @Test
+    public void testClearDaemonCacheWrongAuthenticator() throws Exception {
+        connection = connect();
+        try {
+            connection.flushCache(CacheEntryType.config);
+            fail("should not be able to flush the cache without authenticating");
+        } catch (CommandFailedException cfe) {
+            assertEquals("must be in AUTHENTICATED or SELECTED state", cfe.getError());
+        }
+        connection.login(PASS);
+        try {
+            connection.flushCache(CacheEntryType.config);
+            fail("should not be able to flush the cache without using X-ZIMBRA auth mechanism");
+        } catch (CommandFailedException cfe) {
+            assertEquals("must be authenticated with X-ZIMBRA auth mechanism", cfe.getError());
+        }
     }
 
     @Test
