@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.zimbra.common.account.Key.CacheEntryBy;
 import com.zimbra.common.localconfig.ConfigException;
 import com.zimbra.common.localconfig.LC;
 import com.zimbra.common.service.ServiceException;
@@ -63,6 +64,7 @@ public class TestImapViaImapDaemon extends SharedImapTests {
         connection = new ImapConnection(config);
         connection.connect();
         connection.authenticate(AuthProvider.getAuthToken(acct).getEncoded());
-        connection.flushCache();
+        connection.flushConfigCache();
+        connection.flushAccountCache(CacheEntryBy.name, USER);
     }
 }
