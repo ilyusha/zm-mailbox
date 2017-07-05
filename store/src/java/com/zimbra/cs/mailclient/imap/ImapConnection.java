@@ -731,7 +731,8 @@ public final class ImapConnection extends MailConnection {
     }
 
     public void flushConfigCache() throws IOException {
-        flushCache(CacheEntryType.config, null);
+        ImapRequest req = newRequest(CAtom.FLUSHCACHE, CacheEntryType.config);
+        req.sendCheckStatus();
     }
 
     public void flushAccountCache(CacheEntryBy by, String... accounts) throws IOException {
@@ -740,11 +741,7 @@ public final class ImapConnection extends MailConnection {
 
     public void flushCache(CacheEntryType type, CacheEntryBy by, String... entries) throws IOException {
         ImapRequest req;
-        if (by == null) {
-            req = newRequest(CAtom.FLUSHCACHE, type, entries);
-        } else {
-            req = newRequest(CAtom.FLUSHCACHE, type, by, entries);
-        }
+        req = newRequest(CAtom.FLUSHCACHE, type, by, entries);
         req.sendCheckStatus();
     }
 }
