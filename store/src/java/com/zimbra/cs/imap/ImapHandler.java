@@ -538,6 +538,7 @@ public abstract class ImapHandler {
                         } catch (ServiceException e) {
                             throw new ImapParseException(tag, "invalid cacheBy type: " + cacheByStr);
                         }
+                        req.skipSpace();
                         entries = req.readCacheEntries();
                     }
                     return doFLUSHCACHE(tag, cacheType, cacheBy, entries);
