@@ -82,11 +82,11 @@ public class TestImapViaImapDaemon extends SharedImapTests {
         config.setMechanism(ZimbraAuthenticator.MECHANISM);
         config.setAuthenticatorFactory(authFactory);
         config.setPort(imapPort);
-        config.setAuthenticationId(USER);
+        config.setAuthenticationId(LC.zimbra_ldap_user.value());
         config.getLogger().setLevel(Log.Level.trace);
         connection = new ImapConnection(config);
         connection.connect();
-        connection.authenticate(AuthProvider.getAuthToken(acct).getEncoded());
+        connection.authenticate(AuthProvider.getAdminAuthToken().getEncoded());
         connection.flushCache(CacheEntryType.account, CacheEntryBy.name, acct.getName(), acct.getName());
         connection.flushCache(CacheEntryType.config);
     }
