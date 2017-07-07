@@ -189,6 +189,7 @@ public class TestImapViaImapDaemon extends SharedImapTests {
             } catch (CommandFailedException e) {}
         } finally {
             TestUtil.setLCValue(LC.imap_max_consecutive_error, String.valueOf(savedMaxConsecutiveError));
+            adminConn.reloadLocalConfig();
         }
     }
 }
