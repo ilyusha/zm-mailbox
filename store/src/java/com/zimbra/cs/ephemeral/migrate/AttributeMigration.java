@@ -47,6 +47,7 @@ import com.zimbra.cs.account.Provisioning;
 import com.zimbra.cs.account.SearchDirectoryOptions;
 import com.zimbra.cs.account.SearchDirectoryOptions.ObjectType;
 import com.zimbra.cs.account.Server;
+import com.zimbra.cs.account.ZimbraAuthToken;
 import com.zimbra.cs.account.ldap.LdapProvisioning;
 import com.zimbra.cs.account.soap.SoapProvisioning;
 import com.zimbra.cs.ephemeral.EphemeralInput;
@@ -54,12 +55,14 @@ import com.zimbra.cs.ephemeral.EphemeralKey;
 import com.zimbra.cs.ephemeral.EphemeralLocation;
 import com.zimbra.cs.ephemeral.EphemeralResult;
 import com.zimbra.cs.ephemeral.EphemeralStore;
+import com.zimbra.cs.ephemeral.EphemeralStore.BackendType;
 import com.zimbra.cs.ephemeral.FallbackEphemeralStore;
 import com.zimbra.cs.ephemeral.LdapEntryLocation;
 import com.zimbra.cs.ephemeral.LdapEphemeralStore;
 import com.zimbra.cs.httpclient.URLUtil;
 import com.zimbra.cs.ldap.ZLdapFilter;
 import com.zimbra.cs.ldap.ZLdapFilterFactory;
+import com.zimbra.cs.service.AuthProvider;
 import com.zimbra.cs.service.admin.FlushCache;
 import com.zimbra.soap.admin.type.CacheEntryType;
 
@@ -933,15 +936,19 @@ public class AttributeMigration {
 
         }
 
-        EphemeralStore.Factory.setBackendType(EphemeralStore.BackendType.previous);
+        EphemeralStore.Factory factory = null;
         try {
+            factory = EphemeralStore.getNewFactory(BackendType.previous);
+            EphemeralStore store = factory.getStore();
             for (Server server: imapServers) {
                 executor.submit(new Runnable() {
 
                     @Override
                     public void run() {
                         try {
-                            FlushCache.flushCacheOnImapDaemon(server, "config", null);
+                            ZimbraAuthToken token = (ZimbraAuthToken) AuthProvider.getAdminAuthToken();
+                            token.registerWithEphemeralStore(store);
+                            FlushCache.flushCacheOnImapDaemon(server, "config", null, token);
                             ZimbraLog.ephemeral.debug("sent FlushCache request to imapd server %s", server.getServiceHostname());
                         } catch (ServiceException e) {
                             ZimbraLog.ephemeral.warn("cannot send FLUSHCACHE IMAP request to imapd server %s", server.getServiceHostname(), e);
@@ -950,8 +957,12 @@ public class AttributeMigration {
 
                 });
             }
+        } catch (ServiceException e) {
+            ZimbraLog.ephemeral.error("could not instantiate previous EphemeralStore", e);
         } finally {
-            EphemeralStore.Factory.setBackendType(EphemeralStore.BackendType.primary);
+            if (factory != null) {
+                factory.shutdown();
+            }
         }
         executor.shutdown();
         try {
