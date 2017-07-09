@@ -28,6 +28,7 @@ public class EphemeralBackendCheck extends AttributeCallback {
             if (tokens != null && tokens.length > 0) {
                 String backend = tokens[0];
                 if (backend.equalsIgnoreCase("ldap")) {
+                    savePreviousUrl(context, entry);
                     EphemeralStore.clearFactory();
                     return;
                 }
@@ -61,10 +62,14 @@ public class EphemeralBackendCheck extends AttributeCallback {
                 throw ServiceException.FAILURE(String.format(
                         "unable to modify %s; no ephemeral backend specified", attrName), null);
             }
-            String prevUrl = ((Config) entry).getEphemeralBackendURL();
-            if (!Strings.isNullOrEmpty(prevUrl)) {
-                context.setData(DataKey.PREV_EPHEMERAL_BACKEND_URL, prevUrl);
-            }
+            savePreviousUrl(context, entry);
+        }
+    }
+
+    private void savePreviousUrl(CallbackContext context, Entry entry) {
+        String prevUrl = ((Config) entry).getEphemeralBackendURL();
+        if (!Strings.isNullOrEmpty(prevUrl)) {
+            context.setData(DataKey.PREV_EPHEMERAL_BACKEND_URL, prevUrl);
         }
     }
 
