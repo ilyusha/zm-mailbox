@@ -2,12 +2,15 @@ package com.zimbra.cs.account.callback;
 
 import java.util.Map;
 
+import com.google.common.base.Strings;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.Log.Level;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.AttributeCallback;
+import com.zimbra.cs.account.Config;
 import com.zimbra.cs.account.Entry;
 import com.zimbra.cs.account.Provisioning;
+import com.zimbra.cs.account.callback.CallbackContext.DataKey;
 import com.zimbra.cs.ephemeral.EphemeralStore;
 import com.zimbra.cs.ephemeral.EphemeralStore.Factory;
 import com.zimbra.cs.ephemeral.migrate.AttributeMigration;
@@ -58,11 +61,21 @@ public class EphemeralBackendCheck extends AttributeCallback {
                 throw ServiceException.FAILURE(String.format(
                         "unable to modify %s; no ephemeral backend specified", attrName), null);
             }
+            String prevUrl = ((Config) entry).getEphemeralBackendURL();
+            if (!Strings.isNullOrEmpty(prevUrl)) {
+                context.setData(DataKey.PREV_EPHEMERAL_BACKEND_URL, prevUrl);
+            }
         }
     }
 
     @Override
     public void postModify(CallbackContext context, String attrName, Entry entry) {
+        String prevUrl = context.getData(DataKey.PREV_EPHEMERAL_BACKEND_URL);
+        try {
+            ((Config) entry).setPreviousEphemeralBackendURL(prevUrl);
+        } catch (ServiceException e) {
+            ZimbraLog.ephemeral.error(String.format("unable to set zimbraPreviousEphemeralBackendURL to %s", prevUrl), e);
+        }
         AttributeMigration.clearConfigCacheOnAllServers(false);
     }
 
