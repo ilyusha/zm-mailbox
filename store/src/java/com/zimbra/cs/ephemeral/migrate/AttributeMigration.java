@@ -898,7 +898,6 @@ public class AttributeMigration {
             imapServers = Provisioning.getInstance().getAllServers(Provisioning.SERVICE_IMAP);
         } catch (ServiceException e) {
             ZimbraLog.account.warn("cannot fetch list of imapd servers");
-            return;
         }
         for (Server server: servers) {
             try {
@@ -936,32 +935,34 @@ public class AttributeMigration {
 
         }
 
-        EphemeralStore.Factory factory = null;
-        try {
-            factory = EphemeralStore.getNewFactory(BackendType.previous);
-            EphemeralStore store = factory.getStore();
-            for (Server server: imapServers) {
-                executor.submit(new Runnable() {
+        if (imapServers != null && imapServers.size() > 0) {
+            EphemeralStore.Factory factory = null;
+            try {
+                factory = EphemeralStore.getNewFactory(BackendType.previous);
+                EphemeralStore store = factory.getStore();
+                for (Server server: imapServers) {
+                    executor.submit(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        try {
-                            ZimbraAuthToken token = (ZimbraAuthToken) AuthProvider.getAdminAuthToken();
-                            token.registerWithEphemeralStore(store);
-                            FlushCache.flushCacheOnImapDaemon(server, "config", null, token);
-                            ZimbraLog.ephemeral.debug("sent FlushCache request to imapd server %s", server.getServiceHostname());
-                        } catch (ServiceException e) {
-                            ZimbraLog.ephemeral.warn("cannot send FLUSHCACHE IMAP request to imapd server %s", server.getServiceHostname(), e);
+                        @Override
+                        public void run() {
+                            try {
+                                ZimbraAuthToken token = (ZimbraAuthToken) AuthProvider.getAdminAuthToken();
+                                token.registerWithEphemeralStore(store);
+                                FlushCache.flushCacheOnImapDaemon(server, "config", null, token);
+                                ZimbraLog.ephemeral.debug("sent FlushCache request to imapd server %s", server.getServiceHostname());
+                            } catch (ServiceException e) {
+                                ZimbraLog.ephemeral.warn("cannot send FLUSHCACHE IMAP request to imapd server %s", server.getServiceHostname(), e);
+                            }
                         }
-                    }
 
-                });
-            }
-        } catch (ServiceException e) {
-            ZimbraLog.ephemeral.error("could not instantiate previous EphemeralStore", e);
-        } finally {
-            if (factory != null) {
-                factory.shutdown();
+                    });
+                }
+            } catch (ServiceException e) {
+                ZimbraLog.ephemeral.error("could not instantiate previous EphemeralStore", e);
+            } finally {
+                if (factory != null) {
+                    factory.shutdown();
+                }
             }
         }
         executor.shutdown();
