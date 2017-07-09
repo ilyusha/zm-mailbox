@@ -932,20 +932,26 @@ public class AttributeMigration {
             });
 
         }
-        for (Server server: imapServers) {
-            executor.submit(new Runnable() {
 
-                @Override
-                public void run() {
-                    try {
-                        FlushCache.flushCacheOnImapDaemon(server, "config", null);
-                        ZimbraLog.ephemeral.debug("sent FlushCache request to imapd server %s", server.getServiceHostname());
-                    } catch (ServiceException e) {
-                        ZimbraLog.ephemeral.warn("cannot send FLUSHCACHE IMAP request to imapd server %s", server.getServiceHostname(), e);
+        EphemeralStore.Factory.setBackendType(EphemeralStore.BackendType.previous);
+        try {
+            for (Server server: imapServers) {
+                executor.submit(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            FlushCache.flushCacheOnImapDaemon(server, "config", null);
+                            ZimbraLog.ephemeral.debug("sent FlushCache request to imapd server %s", server.getServiceHostname());
+                        } catch (ServiceException e) {
+                            ZimbraLog.ephemeral.warn("cannot send FLUSHCACHE IMAP request to imapd server %s", server.getServiceHostname(), e);
+                        }
                     }
-                }
 
-            });
+                });
+            }
+        } finally {
+            EphemeralStore.Factory.setBackendType(EphemeralStore.BackendType.primary);
         }
         executor.shutdown();
         try {
