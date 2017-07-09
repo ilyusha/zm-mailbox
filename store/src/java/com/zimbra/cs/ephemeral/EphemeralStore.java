@@ -259,6 +259,7 @@ public abstract class EphemeralStore {
         try {
             Factory newFactory = factoryClass.newInstance();
             newFactory.setBackendType(backendType);
+            newFactory.startup();
             return newFactory;
         } catch (InstantiationException | IllegalAccessException e) {
             throw ServiceException.FAILURE(String.format("unable to initialize EphemeralsStore factory %s", factoryClass.getDeclaringClass().getSimpleName()), e);
