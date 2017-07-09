@@ -241,7 +241,7 @@ public abstract class EphemeralStore {
                 factoryClassName = factories.get(tokens[0]);
             }
         } else {
-            factoryClassName = factories.get("ldap");
+            throw ServiceException.FAILURE("no ephemeral backend URL specified", null);
         }
         if (factoryClassName == null) {
             throw ServiceException.FAILURE("no EphemeralStore.Factory class specified", null);
