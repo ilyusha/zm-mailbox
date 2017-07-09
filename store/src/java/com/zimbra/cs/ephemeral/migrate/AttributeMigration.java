@@ -935,8 +935,8 @@ public class AttributeMigration {
 
         }
 
+        EphemeralStore.Factory factory = null;
         if (imapServers != null && imapServers.size() > 0) {
-            EphemeralStore.Factory factory = null;
             try {
                 factory = EphemeralStore.getNewFactory(BackendType.previous);
                 EphemeralStore store = factory.getStore();
@@ -960,14 +960,14 @@ public class AttributeMigration {
             } catch (ServiceException e) {
                 ZimbraLog.ephemeral.error("could not instantiate previous EphemeralStore", e);
             } finally {
-                if (factory != null) {
-                    factory.shutdown();
-                }
             }
         }
         executor.shutdown();
         try {
             executor.awaitTermination(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {}
+        if (factory != null) {
+            factory.shutdown();
+        }
     }
 }
