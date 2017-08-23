@@ -58,6 +58,8 @@ import com.zimbra.cs.ephemeral.migrate.MigrationInfo;
 import com.zimbra.cs.index.IndexStore;
 import com.zimbra.cs.index.elasticsearch.ElasticSearchConnector;
 import com.zimbra.cs.index.elasticsearch.ElasticSearchIndex;
+import com.zimbra.cs.index.history.InMemorySearchHistoryFactory;
+import com.zimbra.cs.index.history.SearchHistoryStore;
 import com.zimbra.cs.mailbox.calendar.Invite;
 import com.zimbra.cs.mime.Mime;
 import com.zimbra.cs.mime.ParsedMessage;
@@ -150,6 +152,7 @@ public final class MailboxTestUtil {
 
         MailboxManager.setInstance(null);
         IndexStore.setFactory(LC.zimbra_class_index_store_factory.value());
+        SearchHistoryStore.setFactory(InMemorySearchHistoryFactory.class);
 
         LC.zimbra_class_store.setDefault(storeManagerClass.getName());
         StoreManager.getInstance().startup();
@@ -166,6 +169,7 @@ public final class MailboxTestUtil {
 
         MailboxManager.setInstance(null);
         IndexStore.setFactory(LC.zimbra_class_index_store_factory.value());
+        SearchHistoryStore.setFactory(InMemorySearchHistoryFactory.class);
 
         LC.zimbra_class_store.setDefault(storeManagerClass.getName());
         StoreManager.getInstance().startup();
