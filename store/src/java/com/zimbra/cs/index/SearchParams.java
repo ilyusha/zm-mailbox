@@ -45,8 +45,11 @@ import com.zimbra.common.soap.Element;
 import com.zimbra.common.soap.MailConstants;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Server;
+import com.zimbra.cs.index.history.SearchHistoryStore;
 import com.zimbra.cs.mailbox.MailItem;
 import com.zimbra.cs.mailbox.MailServiceException;
+import com.zimbra.cs.mailbox.Mailbox;
+import com.zimbra.cs.mailbox.MailboxManager;
 import com.zimbra.cs.service.mail.CalendarUtils;
 import com.zimbra.cs.service.mail.ToXML.OutputParticipants;
 import com.zimbra.cs.service.util.ItemId;
@@ -543,7 +546,16 @@ public final class SearchParams implements Cloneable, ZimbraSearchParams {
         params.setHopCount(zsc.getHopCount());
         params.setCalItemExpandStart(Objects.firstNonNull(soapParams.getCalItemExpandStart(), -1L));
         params.setCalItemExpandEnd(Objects.firstNonNull(soapParams.getCalItemExpandEnd(), -1L));
-        String query = soapParams.getQuery() == null ? defaultQueryStr : soapParams.getQuery();
+        String query;
+        if (soapParams.getQuery() == null) {
+            query = defaultQueryStr;
+        } else {
+            query = soapParams.getQuery();
+            SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
+            String id = zsc.getRequestedAccountId();
+            Mailbox mbox = MailboxManager.getInstance().getMailboxByAccountId(id);
+            searchHistory.add(mbox, query);
+        }
         if (query == null) {
             throw ServiceException.INVALID_REQUEST("no query submitted and no default query found", null);
         }
