@@ -633,6 +633,12 @@ public final class ElasticSearchIndex extends IndexStore {
                 }
             }
         }
+
+        @Override
+        public void addDocument(IndexDocument doc) throws IOException {
+            // TODO Auto-generated method stub
+
+        }
     }
 
     private final class ElasticIndexReader implements ZimbraIndexReader {

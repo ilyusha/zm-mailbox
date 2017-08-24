@@ -886,6 +886,16 @@ public final class LuceneIndex extends IndexStore {
             }
         }
 
+        @Override
+        public void addDocument(IndexDocument doc) throws IOException {
+            synchronized (doc) {
+                Document luceneDoc = doc.toDocument();
+                if (ZimbraLog.index.isTraceEnabled()) {
+                    ZimbraLog.index.trace("Adding lucene document %s", luceneDoc.toString());
+                }
+                writer.get().addDocument(luceneDoc);
+            }
+        }
         /**
          * Deletes documents.
          * <p>

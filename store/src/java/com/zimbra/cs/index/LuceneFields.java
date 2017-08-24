@@ -17,12 +17,12 @@
 
 package com.zimbra.cs.index;
 
-import com.zimbra.cs.mailbox.Flag;
 import java.util.Map;
 
 import org.apache.lucene.document.Field;
 
 import com.google.common.collect.ImmutableMap;
+import com.zimbra.cs.mailbox.Flag;
 
 /**
  * Standard Lucene fields.
@@ -192,6 +192,16 @@ public final class LuceneFields {
     public static final String L_H_MESSAGE_ID = "msg_id";
 
     /**
+     * Text of search history entries
+     */
+    public static final String L_HIST = "hist";
+
+    /**
+     * ID of search history entries
+     */
+    public static final String L_HIST_ID = "hist_id";
+
+    /**
      * field operator: structured data storage
      */
     public static final String L_FIELD = "l.field";
@@ -220,7 +230,9 @@ public final class LuceneFields {
         SORT_DATE(L_SORT_DATE, Field.Store.YES, Field.Index.NOT_ANALYZED),
         CONTACT_DATA(L_CONTACT_DATA, Field.Store.NO, Field.Index.ANALYZED),
         OBJECTS(L_OBJECTS, Field.Store.NO, Field.Index.ANALYZED),
-        VERSION(L_VERSION, Field.Store.YES, Field.Index.NOT_ANALYZED);
+        VERSION(L_VERSION, Field.Store.YES, Field.Index.NOT_ANALYZED),
+        HISTORY(L_HIST, Field.Store.NO, Field.Index.ANALYZED),
+        HISTORY_ID(L_HIST_ID, Field.Store.YES, Field.Index.NOT_ANALYZED);
 
         private String fieldName;
         private Field.Store storeSetting;
