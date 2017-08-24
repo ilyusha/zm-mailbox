@@ -67,6 +67,8 @@ public final class MailConstants {
     public static final String E_SEARCH_SUGGEST_RESPONSE = "SearchSuggestResponse";
     public static final String E_REJECT_SAVE_SEARCH_PROMPT_REQUEST = "RejectSaveSearchPromptRequest";
     public static final String E_REJECT_SAVE_SEARCH_PROMPT_RESPONSE = "RejectSaveSearchPromptResponse";
+    public static final String E_CLEAR_SEARCH_HISTORY_REQUEST = "ClearSearchHistoryRequest";
+    public static final String E_CLEAR_SEARCH_HISTORY_RESPONSE = "ClearSearchHistoryResponse";
     public static final String E_BROWSE_REQUEST = "BrowseRequest";
     public static final String E_BROWSE_RESPONSE = "BrowseResponse";
     public static final String E_EMPTY_DUMPSTER_REQUEST = "EmptyDumpsterRequest";
@@ -318,6 +320,8 @@ public final class MailConstants {
     public static final QName SEARCH_SUGGEST_RESPONSE = QName.get(E_SEARCH_SUGGEST_RESPONSE, NAMESPACE);
     public static final QName REJECT_SAVE_SEARCH_PROMPT_REQUEST = QName.get(E_REJECT_SAVE_SEARCH_PROMPT_REQUEST, NAMESPACE);
     public static final QName REJECT_SAVE_SEARCH_PROMPT_RESPONSE = QName.get(E_REJECT_SAVE_SEARCH_PROMPT_RESPONSE, NAMESPACE);
+    public static final QName CLEAR_SEARCH_HISTORY_REQUEST = QName.get(E_CLEAR_SEARCH_HISTORY_REQUEST, NAMESPACE);
+    public static final QName CLEAR_SEARCH_HISTORY_RESPONSE = QName.get(E_CLEAR_SEARCH_HISTORY_RESPONSE, NAMESPACE);
 
     // dumpster
     public static final QName EMPTY_DUMPSTER_REQUEST = QName.get(E_EMPTY_DUMPSTER_REQUEST, NAMESPACE);

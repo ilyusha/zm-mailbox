@@ -427,6 +427,8 @@ public final class JaxbUtil {
             com.zimbra.soap.mail.message.SearchSuggestResponse.class,
             com.zimbra.soap.mail.message.RejectSaveSearchPromptRequest.class,
             com.zimbra.soap.mail.message.RejectSaveSearchPromptResponse.class,
+            com.zimbra.soap.mail.message.ClearSearchHistoryRequest.class,
+            com.zimbra.soap.mail.message.ClearSearchHistoryResponse.class,
             com.zimbra.soap.mail.message.SendDeliveryReportRequest.class,
             com.zimbra.soap.mail.message.SendDeliveryReportResponse.class,
             com.zimbra.soap.mail.message.SendInviteReplyRequest.class,
