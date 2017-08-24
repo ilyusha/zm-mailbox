@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.rmi.ServerError;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -160,6 +161,7 @@ import com.zimbra.soap.base.SpecifyContact;
 import com.zimbra.soap.mail.message.BeginTrackingIMAPRequest;
 import com.zimbra.soap.mail.message.CheckSpellingRequest;
 import com.zimbra.soap.mail.message.CheckSpellingResponse;
+import com.zimbra.soap.mail.message.ClearSearchHistoryRequest;
 import com.zimbra.soap.mail.message.CreateContactRequest;
 import com.zimbra.soap.mail.message.CreateSearchFolderRequest;
 import com.zimbra.soap.mail.message.CreateSearchFolderResponse;
@@ -194,8 +196,11 @@ import com.zimbra.soap.mail.message.OpenIMAPFolderRequest;
 import com.zimbra.soap.mail.message.OpenIMAPFolderResponse;
 import com.zimbra.soap.mail.message.RecordIMAPSessionRequest;
 import com.zimbra.soap.mail.message.RecordIMAPSessionResponse;
+import com.zimbra.soap.mail.message.RejectSaveSearchPromptRequest;
 import com.zimbra.soap.mail.message.ResetRecentMessageCountRequest;
 import com.zimbra.soap.mail.message.SaveIMAPSubscriptionsRequest;
+import com.zimbra.soap.mail.message.SearchSuggestRequest;
+import com.zimbra.soap.mail.message.SearchSuggestResponse;
 import com.zimbra.soap.mail.type.ActionResult;
 import com.zimbra.soap.mail.type.ActionSelector;
 import com.zimbra.soap.mail.type.ContactSpec;
@@ -6438,6 +6443,29 @@ public class ZMailbox implements ToZJSONObject, MailboxStore {
             }
         } while (folderInfo.getHasMore());
         return msgs;
+    }
+
+    /**
+     * Get search suggestions based on search history
+     */
+    public List<String> getSearchSuggestions(String query) throws ServiceException {
+        SearchSuggestResponse resp = invokeJaxb(new SearchSuggestRequest(query));
+        return resp.getSearches();
+    }
+
+    /**
+     * Clear the search history for this mailbox
+     */
+    public void clearSearchHistory() throws ServiceException {
+        invokeJaxb(new ClearSearchHistoryRequest());
+    }
+
+    /**
+     * Notifiy the server that the client rejected a prompt to save a search
+     * as a saved folder.
+     */
+    public void rejectSaveSearchFolderPrompt(String query) throws ServiceException {
+        invokeJaxb(new RejectSaveSearchPromptRequest(query));
     }
 
     public static class OpenIMAPFolderParams {
