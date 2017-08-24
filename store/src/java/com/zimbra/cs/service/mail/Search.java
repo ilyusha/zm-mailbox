@@ -50,6 +50,7 @@ import com.zimbra.cs.index.SortBy;
 import com.zimbra.cs.index.ZimbraHit;
 import com.zimbra.cs.index.ZimbraQueryResults;
 import com.zimbra.cs.index.history.SearchHistoryStore;
+import com.zimbra.cs.index.history.SearchHistoryStore.SavedSearchStatus;
 import com.zimbra.cs.mailbox.ContactMemberOfMap;
 import com.zimbra.cs.mailbox.MailItem;
 import com.zimbra.cs.mailbox.MailServiceException;
@@ -125,25 +126,15 @@ public class Search extends MailDocumentHandler  {
         }
     }
 
-    private boolean searchFolderExists(OperationContext octxt, Mailbox mbox, String query) throws ServiceException {
-        List<? extends MailItem> results = mbox.getItemList(octxt, MailItem.Type.SEARCHFOLDER, -1, SortBy.NONE);
-        for (MailItem folder: results) {
-            SearchFolder searchFolder = (SearchFolder) folder;
-            if (searchFolder.getQuery().equals(query)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     protected void putSaveSearchPrompt(OperationContext octxt, Element response, Mailbox mbox, String query, String defaultQuery) {
         if (!query.equals(defaultQuery)) {
             SearchHistoryStore store = SearchHistoryStore.getInstance();
             try {
                 int threshold = 3; //TODO: move to LDAP
                 int searchCount = store.getCount(mbox, query);
-                if (searchCount >= threshold && !searchFolderExists(octxt, mbox, query)) {
+                if (searchCount >= threshold && store.savedSearchNeverPrompted(mbox, query)) {
                     response.addAttribute(MailConstants.A_SAVE_SEARCH_PROMPT, true);
+                    store.setSavedSearchPromptStatus(mbox, query, SavedSearchStatus.PROMPTED);
                 }
             } catch (ServiceException e) {
                 //don't interrupt search
