@@ -3,12 +3,10 @@ package com.zimbra.cs.index.history;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.zimbra.common.service.ServiceException;
-import com.zimbra.common.util.Pair;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.mailbox.Mailbox;
 
@@ -122,6 +120,50 @@ public class SearchHistoryStore {
     }
 
     /**
+     * Set the prompt status of the given search string
+     */
+    public void setSavedSearchPromptStatus(Mailbox mbox, String searchString, SavedSearchStatus status) throws ServiceException {
+        SavedSearchPromptLog promptLog = factory.getSavedSearchPromptLog(mbox);
+        promptLog.savePromptStatus(searchString, status);
+    }
+
+    /**
+     * Returns a boolean representing whether a saved search folder exists for this query
+     */
+    public boolean savedSearchExists(Mailbox mbox, String searchString) throws ServiceException {
+        SavedSearchPromptLog promptLog = factory.getSavedSearchPromptLog(mbox);
+        return promptLog.savedSearchExists(searchString);
+    }
+
+    /**
+     * Returns a boolean representing whether the user has rejected creating a saved search
+     * folder for this query in the past
+     */
+    public boolean savedSearchRejected(Mailbox mbox, String searchString) throws ServiceException {
+        SavedSearchPromptLog promptLog = factory.getSavedSearchPromptLog(mbox);
+        return promptLog.promptRejected(searchString);
+    }
+
+    /**
+     * Returns a boolean representing whether the user has been prompted to create a saved
+     * search folder for this search query, but has not responded yet
+     */
+    public boolean savedSearchPrompted(Mailbox mbox, String searchString) throws ServiceException {
+        SavedSearchPromptLog promptLog = factory.getSavedSearchPromptLog(mbox);
+        return promptLog.prompted(searchString);
+    }
+
+    /**
+     * Returns a boolean representing whether the user has never been prompted to create a saved
+     * search folder for this search query.
+     */
+    public boolean savedSearchNeverPrompted(Mailbox mbox, String searchString) throws ServiceException {
+        SavedSearchPromptLog promptLog = factory.getSavedSearchPromptLog(mbox);
+        return promptLog.notPrompted(searchString);
+    }
+
+
+    /**
      * Get the number of times the given term was searched
      */
     public int getCount(Mailbox mbox, String searchString) throws ServiceException {
@@ -134,6 +176,7 @@ public class SearchHistoryStore {
         public HistoryIndex getIndex(Mailbox mbox);
         public HistoryMetadataStore getMetadataStore(Mailbox mbox);
         public HistoryConfig getConfig(Mailbox mbox);
+        public SavedSearchPromptLog getSavedSearchPromptLog(Mailbox mbox);
     }
 
     public static class SearchHistoryMetadataParams {
@@ -295,5 +338,57 @@ public class SearchHistoryStore {
          * in results, and will eventually be deleted from the metadata store
          */
         public long getMaxAge() throws ServiceException;
+    }
+
+    /**
+     * Provides information about search strings prompted for saving as a search folder
+     */
+    public static abstract class SavedSearchPromptLog {
+
+
+        /**
+         * Returns a boolean representing whether a saved search folder exists for this query
+         */
+        public boolean savedSearchExists(String searchString) throws ServiceException {
+            return getSavedSearchStatus(searchString) == SavedSearchStatus.CREATED;
+        }
+
+        /**
+         * Returns a boolean representing whether the user has rejected creating a saved search
+         * folder for this query in the past
+         */
+        public boolean promptRejected(String searchString) throws ServiceException {
+            return getSavedSearchStatus(searchString) == SavedSearchStatus.REJECTED;
+        }
+
+        /**
+         * Returns a boolean representing whether the user has been prompted to create a saved
+         * search folder for this search query, but has not responded yet
+         */
+        public boolean prompted(String searchString) throws ServiceException {
+            return getSavedSearchStatus(searchString) == SavedSearchStatus.PROMPTED;
+        }
+
+        /**
+         * Returns a boolean representing whether the user has never been prompted to create a saved
+         * search folder for this search query.
+         */
+        public boolean notPrompted(String searchString) throws ServiceException {
+            return getSavedSearchStatus(searchString) == SavedSearchStatus.NOT_PROMPTED;
+        }
+
+        /**
+         * Returns the status of the provided search string
+         */
+        protected abstract SavedSearchStatus getSavedSearchStatus(String searchString) throws ServiceException;
+
+        /**
+         * Set the status of the given search string
+         */
+        public abstract void savePromptStatus(String searchString, SavedSearchStatus status) throws ServiceException;
+    }
+
+    public static enum SavedSearchStatus {
+       NOT_PROMPTED, PROMPTED, CREATED, REJECTED,
     }
 }

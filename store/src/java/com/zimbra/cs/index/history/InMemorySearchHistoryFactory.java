@@ -6,21 +6,18 @@ import java.util.Map;
 import com.zimbra.cs.index.history.SearchHistoryStore.HistoryConfig;
 import com.zimbra.cs.index.history.SearchHistoryStore.HistoryIndex;
 import com.zimbra.cs.index.history.SearchHistoryStore.HistoryMetadataStore;
+import com.zimbra.cs.index.history.SearchHistoryStore.SavedSearchPromptLog;
 import com.zimbra.cs.mailbox.Mailbox;
 
 public class InMemorySearchHistoryFactory implements SearchHistoryStore.Factory {
 
-    private Map<String, HistoryIndex> indexCache;
-    private Map<String, HistoryMetadataStore> mdCache;
+    private Map<String, HistoryIndex> indexCache = new HashMap<String, HistoryIndex>();
+    private Map<String, HistoryMetadataStore> mdCache = new HashMap<String, HistoryMetadataStore>();
+    private Map<String, SavedSearchPromptLog> promptLogCache = new HashMap<String, SavedSearchPromptLog>();
     private static long maxAge = 0;
 
     public static void setMaxAge(long maxAge) {
         InMemorySearchHistoryFactory.maxAge = maxAge;
-    }
-
-    public InMemorySearchHistoryFactory() {
-        indexCache = new HashMap<String, HistoryIndex>();
-        mdCache = new HashMap<String, HistoryMetadataStore>();
     }
 
     @Override
@@ -48,5 +45,16 @@ public class InMemorySearchHistoryFactory implements SearchHistoryStore.Factory 
     @Override
     public HistoryConfig getConfig(Mailbox mbox) {
         return new InMemorySearchHistoryConfig(maxAge);
+    }
+
+    @Override
+    public SavedSearchPromptLog getSavedSearchPromptLog(Mailbox mbox) {
+        String key = mbox.getAccountId();
+        SavedSearchPromptLog promptLog = promptLogCache.get(key);
+        if (promptLog == null) {
+            promptLog = new InMemorySavedSearchPromptLog();
+            promptLogCache.put(key, promptLog);
+        }
+        return promptLog;
     }
 }
