@@ -63,6 +63,8 @@ public final class MailConstants {
     public static final String E_SEARCH_RESPONSE = "SearchResponse";
     public static final String E_SEARCH_CONV_REQUEST = "SearchConvRequest";
     public static final String E_SEARCH_CONV_RESPONSE = "SearchConvResponse";
+    public static final String E_SEARCH_SUGGEST_REQUEST = "SearchSuggestRequest";
+    public static final String E_SEARCH_SUGGEST_RESPONSE = "SearchSuggestResponse";
     public static final String E_BROWSE_REQUEST = "BrowseRequest";
     public static final String E_BROWSE_RESPONSE = "BrowseResponse";
     public static final String E_EMPTY_DUMPSTER_REQUEST = "EmptyDumpsterRequest";
@@ -306,6 +308,8 @@ public final class MailConstants {
     public static final QName SEARCH_RESPONSE = QName.get(E_SEARCH_RESPONSE, NAMESPACE);
     public static final QName SEARCH_CONV_REQUEST = QName.get(E_SEARCH_CONV_REQUEST, NAMESPACE);
     public static final QName SEARCH_CONV_RESPONSE = QName.get(E_SEARCH_CONV_RESPONSE, NAMESPACE);
+    public static final QName SEARCH_SUGGEST_REQUEST = QName.get(E_SEARCH_SUGGEST_REQUEST, NAMESPACE);
+    public static final QName SEARCH_SUGGEST_RESPONSE = QName.get(E_SEARCH_SUGGEST_RESPONSE, NAMESPACE);
     public static final QName BROWSE_REQUEST = QName.get(E_BROWSE_REQUEST, NAMESPACE);
     public static final QName BROWSE_RESPONSE = QName.get(E_BROWSE_RESPONSE, NAMESPACE);
 
@@ -908,6 +912,8 @@ public final class MailConstants {
     public static final String A_QUICK = "quick";
     public static final String A_SCORE = "score";
     public static final String E_HIT = "hit";
+    public static final String E_SEARCH_HISTORY = "searchHistory";
+
 
     // search-result paging
     public static final String E_CURSOR = "cursor";
