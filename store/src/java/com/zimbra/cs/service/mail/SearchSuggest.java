@@ -20,18 +20,21 @@ public class SearchSuggest extends MailDocumentHandler {
         ZimbraSoapContext zsc = getZimbraSoapContext(context);
         Mailbox mbox = getRequestedMailbox(zsc);
         SearchSuggestRequest req = zsc.elementToJaxb(request);
-        Integer num = req.getLimit();
-        String query = req.getQuery();
-        SearchHistoryParams params = new SearchHistoryParams();
-        if (num != null) {
-            params.setNumResults(num);
-        }
-        if (!Strings.isNullOrEmpty(query)) {
-            params.setPrefix(query);
-        }
+        SearchHistoryParams params = getSearchHistoryParams(req);
         SearchSuggestResponse resp = new SearchSuggestResponse();
         SearchHistoryStore store = SearchHistoryStore.getInstance();
         resp.setSearches(store.getHistory(mbox, params));
         return zsc.jaxbToElement(resp);
+    }
+
+    private SearchHistoryParams getSearchHistoryParams(SearchSuggestRequest req) {
+        SearchHistoryParams params = new SearchHistoryParams();
+        String query = req.getQuery();
+        if (!Strings.isNullOrEmpty(query)) {
+            params.setPrefix(query);
+        }
+        //TODO: get result limit from LDAP
+        params.setNumResults(5);
+        return params;
     }
 }

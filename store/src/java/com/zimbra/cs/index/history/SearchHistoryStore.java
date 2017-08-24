@@ -3,10 +3,12 @@ package com.zimbra.cs.index.history;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.zimbra.common.service.ServiceException;
+import com.zimbra.common.util.Pair;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.mailbox.Mailbox;
 
@@ -59,6 +61,10 @@ public class SearchHistoryStore {
         return factory.getIndex(mbox);
     }
 
+    private HistoryConfig getConfig(Mailbox mbox) {
+        return factory.getConfig(mbox);
+    }
+
     @VisibleForTesting
     void add(Mailbox mbox, String searchString, long millis) throws ServiceException {
         HistoryMetadataStore mdStore = getMetadata(mbox);
@@ -72,20 +78,23 @@ public class SearchHistoryStore {
     }
 
     /**
-     * Remove old search history
-     * @param params
-     * @throws ServiceException
+     * Remove search history entries older than maxAgeMillis
      */
-    public void pruneHistory(Mailbox mbox, PruneParams params) throws ServiceException {
+    public void purgeHistory(Mailbox mbox, long maxAgeMillis) throws ServiceException {
         HistoryMetadataStore mdStore = getMetadata(mbox);
         HistoryIndex index = getIndex(mbox);
-        if (params.isDeleteAll()) {
-            index.deleteAll();
-            mdStore.deleteAll();
-        } else {
-            Collection<Integer> ids = mdStore.delete(params);
-            index.delete(ids);
-        }
+        Collection<Integer> ids = mdStore.deleteByAge(maxAgeMillis);
+        index.delete(ids);
+    }
+
+    /**
+     * Delete all search history for the given mailbox
+     */
+    public void deleteHistory(Mailbox mbox) throws ServiceException {
+        HistoryMetadataStore mdStore = getMetadata(mbox);
+        HistoryIndex index = getIndex(mbox);
+        index.deleteAll();
+        mdStore.deleteAll();
     }
 
     /**
@@ -96,6 +105,8 @@ public class SearchHistoryStore {
      */
     public List<String> getHistory(Mailbox mbox, SearchHistoryParams params) throws ServiceException {
         SearchHistoryMetadataParams mdParams = SearchHistoryMetadataParams.fromSearchParams(params);
+        long maxAge = getConfig(mbox).getMaxAge();
+        mdParams.setMaxAge(maxAge);
         HistoryMetadataStore mdStore = getMetadata(mbox);
         HistoryIndex index = getIndex(mbox);
         if(params.hasPrefix()) {
@@ -115,21 +126,14 @@ public class SearchHistoryStore {
      */
     public int getCount(Mailbox mbox, String searchString) throws ServiceException {
         HistoryMetadataStore mdStore = getMetadata(mbox);
-        return mdStore.getCount(searchString, -1);
+        HistoryConfig config = getConfig(mbox);
+        return mdStore.getCount(searchString, config.getMaxAge());
     }
-
-    /**
-     * Get the number of times the given term was searched within the given timeframe
-     */
-    public int getCount(Mailbox mbox, String searchString, long maxAgeMillis) throws ServiceException {
-        HistoryMetadataStore mdStore = getMetadata(mbox);
-        return mdStore.getCount(searchString, maxAgeMillis);
-    }
-
 
     public static interface Factory {
         public HistoryIndex getIndex(Mailbox mbox);
         public HistoryMetadataStore getMetadataStore(Mailbox mbox);
+        public HistoryConfig getConfig(Mailbox mbox);
     }
 
     public static class SearchHistoryMetadataParams {
@@ -154,17 +158,16 @@ public class SearchHistoryStore {
             return numResults;
         }
 
-        public Long getMaxAge() {
-            return maxAge;
-        }
-
-
         public void setNumResults(int num) {
             numResults = num;
         }
 
         public void setMaxAge(long millis) {
             maxAge = millis;
+        }
+
+        public long getMaxAge() {
+            return maxAge;
         }
 
         public void setIds(Collection<Integer> ids) {
@@ -184,7 +187,7 @@ public class SearchHistoryStore {
         }
 
         public static SearchHistoryMetadataParams fromSearchParams(SearchHistoryParams params) {
-            return new SearchHistoryMetadataParams(params.getNumResults(), params.getMaxAge());
+            return new SearchHistoryMetadataParams(params.getNumResults());
         }
     }
 
@@ -210,43 +213,6 @@ public class SearchHistoryStore {
 
         public String getPrefix() {
             return prefix;
-        }
-    }
-
-    /**
-     * Parameters governing pruning old searches from the history
-     */
-    public static class PruneParams {
-        private int keepCount = -1; //keep up to n distinct searches
-        private long maxAge = -1; //prune all searches older than this
-        private boolean all = false; //clear search history
-
-        public static PruneParams pruneByAge(long maxAge) {
-            PruneParams params = new PruneParams();
-            params.maxAge = maxAge;
-            return params;
-        }
-
-        public static PruneParams pruneByCount(int keepCount) {
-            PruneParams params = new PruneParams();
-            params.keepCount = keepCount;
-            return params;
-        }
-
-        public static PruneParams pruneAll() {
-            PruneParams params = new PruneParams();
-            params.all = true;
-            return params;
-        }
-
-        public long getMaxAge() {
-            return maxAge;
-        }
-        public int getKeepCount() {
-            return keepCount;
-        }
-        public boolean isDeleteAll() {
-            return all;
         }
     }
 
@@ -309,7 +275,7 @@ public class SearchHistoryStore {
          * Delete entries with the given parameters from the metadata store and
          * return the IDs to be deleted from the index
          */
-        public Collection<Integer> delete(PruneParams params) throws ServiceException;
+        public Collection<Integer> deleteByAge(long maxAgeMillis) throws ServiceException;
 
         /**
          * Delete all search history
@@ -320,5 +286,14 @@ public class SearchHistoryStore {
          * Get the number of times the given term was searched within the given timeframe
          */
         public int getCount(String searchString, long maxAgeMillis)  throws ServiceException;
+    }
+
+    public static interface HistoryConfig {
+
+        /**
+         * Search queries older than this will not be included
+         * in results, and will eventually be deleted from the metadata store
+         */
+        public long getMaxAge() throws ServiceException;
     }
 }

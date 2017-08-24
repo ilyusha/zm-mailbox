@@ -10,12 +10,6 @@ public final class SearchSuggestRequest {
 
     public SearchSuggestRequest() {}
 
-    @XmlAttribute(name=MailConstants.A_QUERY_LIMIT /* limit */, required=false)
-    private Integer limit;
-
-    public void setLimit(int limit) { this.limit = limit; }
-    public Integer getLimit() { return limit; }
-
     public SearchSuggestRequest(String query) {
         this.query = query;
     }

@@ -15,7 +15,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.ZimbraLog;
-import com.zimbra.cs.index.history.SearchHistoryStore.PruneParams;
 import com.zimbra.cs.index.history.SearchHistoryStore.SearchHistoryMetadataParams;
 
 /**
@@ -31,7 +30,6 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
     private List<EntryInfo> history = new LinkedList<EntryInfo>();
     //used for groupBy functionality
     private HashMultimap<String, EntryInfo> buckets = HashMultimap.create();
-
 
     @Override
     public int add(String searchString, long timestamp) throws ServiceException {
@@ -52,7 +50,9 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
     public List<String> search(SearchHistoryMetadataParams params)
             throws ServiceException {
         int numResults = params.getNumResults();
+        long maxAge = params.getMaxAge();
 
+        //distinct search string filter is constructed first
         Predicate<EntryInfo> filter = new Predicate<EntryInfo>() {
             private Set<Integer> seen = new HashSet<Integer>();
 
@@ -64,6 +64,7 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
             }
         };
 
+        //specific IDs from an index search are the second filter
         if (params.hasIds()) {
             Set<Integer> ids = new HashSet<Integer>(params.getIds());
             ZimbraLog.search.debug("constructing idFilter with ids=%s", Joiner.on(",").join(ids));
@@ -82,9 +83,9 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
             filter = filter.and(idFilter);
         }
 
-        if (params.hasMaxAge()) {
+        //max age filter
+        if (maxAge > 0) {
             long now = System.currentTimeMillis();
-            long maxAge = params.getMaxAge();
             ZimbraLog.search.debug("constructing ageFilter with age=%s", maxAge);
             Predicate<EntryInfo> ageFilter = new Predicate<EntryInfo>() {
 
@@ -102,6 +103,7 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
             filter = filter.and(ageFilter);
         }
 
+        //result count filter is last
         if (numResults > 0) {
             ZimbraLog.search.debug("constructing numResultsFilter with n=%s", numResults);
             Predicate<EntryInfo> numResultsFilter = new Predicate<EntryInfo>() {
@@ -157,41 +159,18 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
         return idsToDelete;
     }
 
-    private List<Integer> deleteByCount(int keepCount) {
-        ZimbraLog.search.debug("pruning search history with n=%s",keepCount);
-        Set<String> distinctSearches = new HashSet<String>();
-        int idx = 0;
-        for (EntryInfo info: history) {
-            distinctSearches.add(info.getSearchString());
-            idx++;
-            if (distinctSearches.size() == keepCount) {
-                return deleteByPartition(idx);
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    private List<Integer> deleteByAge(long maxAge) {
-        ZimbraLog.search.debug("pruning search history with max age=%s",maxAge);
+    @Override
+    public Collection<Integer> deleteByAge(long maxAgeMillis) throws ServiceException {
+        ZimbraLog.search.debug("purging search history with max age=%s", maxAgeMillis);
         int idx = 0;
         long now = System.currentTimeMillis();
         for (EntryInfo info: history) {
-            if (now - info.timestamp > maxAge) {
+            if (now - info.timestamp > maxAgeMillis) {
                 return deleteByPartition(idx);
             }
             idx++;
         }
         return Collections.emptyList();
-    }
-
-    @Override
-    public Collection<Integer> delete(PruneParams params) throws ServiceException {
-        int keepCount = params.getKeepCount();
-        if (keepCount > 0) {
-            return deleteByCount(keepCount);
-        } else {
-            return deleteByAge(params.getMaxAge());
-        }
     }
 
     @Override

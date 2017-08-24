@@ -19,7 +19,6 @@ import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Account;
 import com.zimbra.cs.account.Provisioning;
 import com.zimbra.cs.index.history.InMemorySearchHistoryIndex;
-import com.zimbra.cs.index.history.SearchHistoryStore.PruneParams;
 import com.zimbra.cs.index.history.SearchHistoryStore.SearchHistoryMetadataParams;
 import com.zimbra.cs.index.history.SearchHistoryStore.SearchHistoryParams;
 import com.zimbra.cs.mailbox.Mailbox;
@@ -54,7 +53,7 @@ public class SearchHistoryTest {
 
     @After
     public void tearDown() throws Exception {
-        store.pruneHistory(mbox, PruneParams.pruneAll());
+        store.deleteHistory(mbox);
         prov.deleteAccount(acct.getId());
     }
 
@@ -205,8 +204,7 @@ public class SearchHistoryTest {
         assertEquals("first result should be search3", "search3", results.get(0));
 
         //prune the oldest occurrence of search1 by age
-        PruneParams pruneParams = PruneParams.pruneByAge(3000);
-        Collection<Integer> deleted = md.delete(pruneParams);
+        Collection<Integer> deleted = md.deleteByAge(3000);
         assertEquals("no entries should be marked as deleted", 0, deleted.size());
         assertEquals("search1 count should be 1", 1, md.getCount("search1", 0));
         //should still show up in search
@@ -218,9 +216,8 @@ public class SearchHistoryTest {
         assertEquals("first result should be search1", "search2", results.get(2));
 
 
-        //prune search2 by count
-        pruneParams = PruneParams.pruneByCount(2);
-        deleted = md.delete(pruneParams);
+        //prune search2 by age
+        deleted = md.deleteByAge(2000);
         assertEquals("one entry should be marked as deleted", 1, deleted.size());
         assertEquals("id2 should be deleted", (Integer) id2, deleted.iterator().next());
         assertEquals("search2 count should be 0", 0, md.getCount("search2", 0));
@@ -246,9 +243,13 @@ public class SearchHistoryTest {
 
         //test counts of searches
         assertEquals("'search1' should have 2 occurrences", 2, store.getCount(mbox, "search1"));
-        assertEquals("'search1' should have 1 occurence within the window", 1, store.getCount(mbox, "search1", 2000));
         assertEquals("'another' should have 1 occurrences", 1, store.getCount(mbox, "another"));
         assertEquals("non-existent search should have 0 occurrences", 0, store.getCount(mbox, "blah"));
+
+        //reduce maxAge to push one of the 'search1' instances out of the window
+        InMemorySearchHistoryFactory.setMaxAge(2000);
+        assertEquals("'search1' should have 1 occurence within the window", 1, store.getCount(mbox, "search1"));
+        InMemorySearchHistoryFactory.setMaxAge(0);
 
         assertEquals("should see 4 results", 4, history.size());
         assertEquals("first result should be 'another'", "another", history.get(0));
@@ -279,29 +280,24 @@ public class SearchHistoryTest {
         assertEquals("first result should be 'search1'", "search1", history.get(0));
         assertEquals("second result should be 'search3'", "search3", history.get(1));
 
-        //test prefix search with limiting by age
+        //test prefix search with limiting by age.
+        //this has to be done on the HistoryConfig level
         params.setNumResults(0);
-        params.setMaxAge(1500);
+        InMemorySearchHistoryFactory.setMaxAge(1500);
         history = store.getHistory(mbox, params);
         assertEquals("should see 1 result", 1, history.size());
         assertEquals("first result should be 'search1'", "search1", history.get(0));
-        params.setMaxAge(2500);
+        InMemorySearchHistoryFactory.setMaxAge(2500);
         history = store.getHistory(mbox, params);
         assertEquals("should see 2 result", 2, history.size());
         assertEquals("first result should be 'search1'", "search1", history.get(0));
         assertEquals("second result should be 'search3'", "search3", history.get(1));
 
-        store.pruneHistory(mbox, PruneParams.pruneByCount(2));
+        store.purgeHistory(mbox, 1500);
         history = store.getHistory(mbox, new SearchHistoryParams());
-        assertEquals("should see 2 results after pruning by count", 2, history.size());
+        assertEquals("should see 2 results after pruning by age", 2, history.size());
         assertEquals("first result should be 'another'", "another", history.get(0));
         assertEquals("second result should be 'search1'", "search1", history.get(1));
         assertEquals("'search1' should have 1 occurrence after pruning", 1, store.getCount(mbox, "search1"));
-
-        store.pruneHistory(mbox, PruneParams.pruneByAge(500));
-        history = store.getHistory(mbox, new SearchHistoryParams());
-        assertEquals("should see 1 result after pruning by age", 1, history.size());
-        assertEquals("first result should be 'another'", "another", history.get(0));
-        assertEquals("'search1' should have 0 occurrences after pruning", 0, store.getCount(mbox, "search1"));
     }
 }
