@@ -59,6 +59,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.StringUtils;
 
 import com.zimbra.client.ZAce;
 import com.zimbra.client.ZAppointmentHit;
@@ -389,6 +390,7 @@ public class ZMailboxUtil implements DebugListener {
         AUTO_COMPLETE("autoComplete", "ac", "{query}", "contact auto autocomplete", Category.CONTACT,  1, 1, O_VERBOSE),
         AUTO_COMPLETE_GAL("autoCompleteGal", "acg", "{query}", "gal auto autocomplete", Category.CONTACT,  1, 1, O_VERBOSE),
         CHECK_RIGHT("checkRight", "ckr", "{name} {right}", "check if the user has the specified right on target.", Category.RIGHT, 2, 2, O_VERBOSE),
+        CLEAR_SEARCH_HISTORY("clearSearchHistory", "csh", "", "clear search history for this user", Category.SEARCH, 0, 0),
         CREATE_CONTACT("createContact", "cct", "[attr1 value1 [attr2 value2...]]", "create contact", Category.CONTACT, 2, Integer.MAX_VALUE, O_FOLDER, O_IGNORE, O_TAGS),
         CREATE_FOLDER("createFolder", "cf", "{folder-path}", "create folder", Category.FOLDER, 1, 1, O_VIEW, O_COLOR, O_FLAGS, O_URL),
         CREATE_IDENTITY("createIdentity", "cid", "{identity-name} [attr1 value1 [attr2 value2...]]", "create identity", Category.ACCOUNT, 1, Integer.MAX_VALUE),
@@ -471,6 +473,7 @@ public class ZMailboxUtil implements DebugListener {
         REVOKE_RIGHT("revokeRight", "rvr", "{account {name}|group {name}|domain {name}||all|public|guest {email} [{password}]|key {email} [{accesskey}] {[-]right}}", "revoke a right previously granted to a grantee or a group of grantees. to revoke a denied right, put a '-' in front of the right", Category.RIGHT, 2, 4),
         SEARCH("search", "s", "{query}", "perform search", Category.SEARCH, 0, 1, O_LIMIT, O_SORT, O_TYPES, O_VERBOSE, O_CURRENT, O_NEXT, O_PREVIOUS, O_DUMPSTER),
         SEARCH_CONVERSATION("searchConv", "sc", "{conv-id} {query}", "perform search on conversation", Category.SEARCH, 0, 2, O_LIMIT, O_SORT, O_TYPES, O_VERBOSE, O_CURRENT, O_NEXT, O_PREVIOUS),
+        SEARCH_SUGGEST("searchSuggest", "ss", "{query}", "return search suggestions based on search history", Category.SEARCH, 0, 1),
         SELECT_MAILBOX("selectMailbox", "sm", "{name}", "select a different mailbox. can only be used by an admin", Category.ADMIN, 1, 1, O_AUTH, O_AS_ADMIN),
         SYNC_FOLDER("syncFolder", "sf", "{folder-path}", "synchronize folder's contents to the remote feed specified by folder's {url}", Category.FOLDER, 1, 1),
         TAG_CONTACT("tagContact", "tct", "{contact-ids} {tag-name} [0|1*]", "tag/untag contact(s)", Category.CONTACT, 2, 3),
@@ -1090,6 +1093,9 @@ public class ZMailboxUtil implements DebugListener {
         case CHECK_RIGHT:
             doCheckRight(args);
             break;
+        case CLEAR_SEARCH_HISTORY:
+            doClearSearchHistory();
+            break;
         case CREATE_CONTACT:
             String ccId = mMbox.createContact(lookupFolderId(folderOpt()),tagsOpt(), getContactMap(args, 0, !ignoreOpt())).getId();
             stdout.println(ccId);
@@ -1332,6 +1338,9 @@ public class ZMailboxUtil implements DebugListener {
             break;
         case SEARCH_CONVERSATION:
             doSearchConv(args);
+            break;
+        case SEARCH_SUGGEST:
+            doSearchSuggest(args);
             break;
         case SELECT_MAILBOX:
             doSelectMailbox(args);
@@ -2193,6 +2202,15 @@ public class ZMailboxUtil implements DebugListener {
         dumpConvSearch(mMbox.searchConversation(mConvSearchConvId, mConvSearchParams), verboseOpt());
     }
 
+    private void doSearchSuggest(String[] args) throws ServiceException {
+        String query = args.length == 0 ? "" : args[0];
+        dumpSearchSuggestions(mMbox.getSearchSuggestions(query));
+    }
+
+    private void doClearSearchHistory() throws ServiceException {
+        mMbox.clearSearchHistory();
+    }
+
     private void doSearchConvRedisplay() {
         ZSearchResult sr = mConvSearchResult;
         if (sr == null) return;
@@ -2313,6 +2331,19 @@ public class ZMailboxUtil implements DebugListener {
             }
         }
         stdout.println();
+    }
+
+    private void dumpSearchSuggestions(List<String> suggestions) {
+        if (suggestions.isEmpty()) {
+            stdout.println("no suggestions for the given query");
+            return;
+        }
+        int maxLength = suggestions.stream().map(str -> str.length()).max(Integer::compare).get();
+        stdout.println("Suggestions");
+        stdout.println(StringUtils.repeat("-", maxLength));
+        for (String s: suggestions) {
+            stdout.println(s);
+        }
     }
 
     private String getFirstEmail(ZContactHit ch) {
