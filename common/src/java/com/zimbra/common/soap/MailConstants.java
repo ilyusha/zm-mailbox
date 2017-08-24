@@ -913,6 +913,7 @@ public final class MailConstants {
     public static final String A_SCORE = "score";
     public static final String E_HIT = "hit";
     public static final String E_SEARCH_HISTORY = "searchHistory";
+    public static final String A_SAVE_SEARCH_PROMPT = "saveSearchPrompt";
 
 
     // search-result paging

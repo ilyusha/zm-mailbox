@@ -49,12 +49,14 @@ import com.zimbra.cs.index.SearchParams.ExpandResults;
 import com.zimbra.cs.index.SortBy;
 import com.zimbra.cs.index.ZimbraHit;
 import com.zimbra.cs.index.ZimbraQueryResults;
+import com.zimbra.cs.index.history.SearchHistoryStore;
 import com.zimbra.cs.mailbox.ContactMemberOfMap;
 import com.zimbra.cs.mailbox.MailItem;
 import com.zimbra.cs.mailbox.MailServiceException;
 import com.zimbra.cs.mailbox.Mailbox;
 import com.zimbra.cs.mailbox.MailboxManager;
 import com.zimbra.cs.mailbox.OperationContext;
+import com.zimbra.cs.mailbox.SearchFolder;
 import com.zimbra.cs.mailbox.calendar.cache.CacheToXML;
 import com.zimbra.cs.mailbox.calendar.cache.CalSummaryCache;
 import com.zimbra.cs.mailbox.calendar.cache.CalSummaryCache.CalendarDataResult;
@@ -116,9 +118,37 @@ public class Search extends MailDocumentHandler  {
             // request and used something else...
             response.addAttribute(MailConstants.A_SORTBY, results.getSortBy().toString());
             putHits(zsc, octxt, response, results, params, memberOfMap);
+            putSaveSearchPrompt(octxt, response, mbox, params.getQueryString(), account.getPrefMailInitialSearch());
             return response;
         } finally {
             Closeables.closeQuietly(results);
+        }
+    }
+
+    private boolean searchFolderExists(OperationContext octxt, Mailbox mbox, String query) throws ServiceException {
+        List<? extends MailItem> results = mbox.getItemList(octxt, MailItem.Type.SEARCHFOLDER, -1, SortBy.NONE);
+        for (MailItem folder: results) {
+            SearchFolder searchFolder = (SearchFolder) folder;
+            if (searchFolder.getQuery().equals(query)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void putSaveSearchPrompt(OperationContext octxt, Element response, Mailbox mbox, String query, String defaultQuery) {
+        if (!query.equals(defaultQuery)) {
+            SearchHistoryStore store = SearchHistoryStore.getInstance();
+            try {
+                int threshold = 3; //TODO: move to LDAP
+                int searchCount = store.getCount(mbox, query);
+                if (searchCount >= threshold && !searchFolderExists(octxt, mbox, query)) {
+                    response.addAttribute(MailConstants.A_SAVE_SEARCH_PROMPT, true);
+                }
+            } catch (ServiceException e) {
+                //don't interrupt search
+                ZimbraLog.search.error("unable to get search count for query '%s'", query, e);
+            }
         }
     }
 
