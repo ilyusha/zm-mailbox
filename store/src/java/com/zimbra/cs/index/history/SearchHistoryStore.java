@@ -65,6 +65,9 @@ public class SearchHistoryStore {
 
     @VisibleForTesting
     void add(Mailbox mbox, String searchString, long millis) throws ServiceException {
+        if (!featureEnabled(mbox)) {
+            return;
+        }
         HistoryMetadataStore mdStore = getMetadata(mbox);
         HistoryIndex index = getIndex(mbox);
         if (mdStore.exists(searchString)) {
@@ -102,6 +105,9 @@ public class SearchHistoryStore {
      * @throws ServiceException
      */
     public List<String> getHistory(Mailbox mbox, SearchHistoryParams params) throws ServiceException {
+        if (!featureEnabled(mbox)) {
+            return Collections.emptyList();
+        }
         SearchHistoryMetadataParams mdParams = SearchHistoryMetadataParams.fromSearchParams(params);
         long maxAge = getConfig(mbox).getMaxAge();
         mdParams.setMaxAge(maxAge);
@@ -160,6 +166,10 @@ public class SearchHistoryStore {
     public boolean savedSearchNeverPrompted(Mailbox mbox, String searchString) throws ServiceException {
         SavedSearchPromptLog promptLog = factory.getSavedSearchPromptLog(mbox);
         return promptLog.notPrompted(searchString);
+    }
+
+    private boolean featureEnabled(Mailbox mbox) throws ServiceException {
+        return mbox.getAccount().isFeatureSearchHistoryEnabled();
     }
 
 

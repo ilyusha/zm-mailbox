@@ -57,7 +57,6 @@ import com.zimbra.cs.mailbox.MailServiceException;
 import com.zimbra.cs.mailbox.Mailbox;
 import com.zimbra.cs.mailbox.MailboxManager;
 import com.zimbra.cs.mailbox.OperationContext;
-import com.zimbra.cs.mailbox.SearchFolder;
 import com.zimbra.cs.mailbox.calendar.cache.CacheToXML;
 import com.zimbra.cs.mailbox.calendar.cache.CalSummaryCache;
 import com.zimbra.cs.mailbox.calendar.cache.CalSummaryCache.CalendarDataResult;
@@ -119,18 +118,21 @@ public class Search extends MailDocumentHandler  {
             // request and used something else...
             response.addAttribute(MailConstants.A_SORTBY, results.getSortBy().toString());
             putHits(zsc, octxt, response, results, params, memberOfMap);
-            putSaveSearchPrompt(octxt, response, mbox, params.getQueryString(), account.getPrefMailInitialSearch());
+            putSaveSearchPrompt(octxt, response, account, mbox, params.getQueryString(), account.getPrefMailInitialSearch());
             return response;
         } finally {
             Closeables.closeQuietly(results);
         }
     }
 
-    protected void putSaveSearchPrompt(OperationContext octxt, Element response, Mailbox mbox, String query, String defaultQuery) {
+    protected void putSaveSearchPrompt(OperationContext octxt, Element response, Account acct, Mailbox mbox, String query, String defaultQuery) {
         if (!query.equals(defaultQuery)) {
+            int threshold = acct.getNumSearchesForSavedSearchPrompt();
+            if (threshold == 0) {
+                return; //feature disabled
+            }
             SearchHistoryStore store = SearchHistoryStore.getInstance();
             try {
-                int threshold = 3; //TODO: move to LDAP
                 int searchCount = store.getCount(mbox, query);
                 if (searchCount >= threshold && store.savedSearchNeverPrompted(mbox, query)) {
                     response.addAttribute(MailConstants.A_SAVE_SEARCH_PROMPT, true);
