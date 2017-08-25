@@ -126,7 +126,7 @@ public class Search extends MailDocumentHandler  {
     }
 
     protected void putSaveSearchPrompt(OperationContext octxt, Element response, Account acct, Mailbox mbox, String query, String defaultQuery) {
-        if (!query.equals(defaultQuery)) {
+        if (!query.equals(defaultQuery) && SearchHistoryStore.shouldSaveInHistory(query)) {
             int threshold = acct.getNumSearchesForSavedSearchPrompt();
             if (threshold == 0) {
                 return; //feature disabled

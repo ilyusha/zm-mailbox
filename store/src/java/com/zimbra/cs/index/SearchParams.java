@@ -554,7 +554,9 @@ public final class SearchParams implements Cloneable, ZimbraSearchParams {
             SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
             String id = zsc.getRequestedAccountId();
             Mailbox mbox = MailboxManager.getInstance().getMailboxByAccountId(id);
-            searchHistory.add(mbox, query);
+            if (SearchHistoryStore.shouldSaveInHistory(query)) {
+                searchHistory.add(mbox, query);
+            }
         }
         if (query == null) {
             throw ServiceException.INVALID_REQUEST("no query submitted and no default query found", null);

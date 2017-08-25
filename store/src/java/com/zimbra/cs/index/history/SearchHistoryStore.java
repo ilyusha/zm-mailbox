@@ -1,6 +1,5 @@
 package com.zimbra.cs.index.history;
 
-import java.rmi.ServerError;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -181,6 +180,16 @@ public class SearchHistoryStore {
         HistoryMetadataStore mdStore = getMetadata(mbox);
         HistoryConfig config = getConfig(mbox);
         return mdStore.getCount(searchString, config.getMaxAge());
+    }
+
+    /**
+     * Returns a boolean representing whether this query string should be saved in the history.
+     * This is used to ignore queries that were not explicitly issued by a user.
+     * This is only necessary until we add the ability for the client to specify whether a query
+     * should be saved in the history
+     */
+    public static boolean shouldSaveInHistory(String searchString) {
+        return !searchString.startsWith("inid:");
     }
 
     public static interface Factory {
