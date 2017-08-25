@@ -21,12 +21,13 @@ public class TestSearchHistory {
     private static String USER = "TestSearchHistory-test";
     private Account acct;
     private ZMailbox mbox;
-    private static int searchesForPrompt = 3; //TODO: get from LDAP
+    private int searchesForPrompt = 3;
 
     @Before
     public void setUp() throws Exception {
         acct = TestUtil.createAccount(USER);
         mbox = TestUtil.getZMailbox(USER);
+        searchesForPrompt = acct.getNumSearchesForSavedSearchPrompt();
     }
 
     @After
