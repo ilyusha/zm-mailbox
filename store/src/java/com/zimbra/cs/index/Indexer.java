@@ -63,4 +63,9 @@ public interface Indexer extends Closeable {
      * Currently used to index search history items
      */
     void addDocument(IndexDocument doc) throws IOException;
+
+    /**
+     * Deletes index documents by the specified field name
+     */
+    void deleteDocument(List<Integer> ids, String fieldName) throws IOException;
 }

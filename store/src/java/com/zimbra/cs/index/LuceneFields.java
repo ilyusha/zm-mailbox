@@ -194,12 +194,12 @@ public final class LuceneFields {
     /**
      * Text of search history entries
      */
-    public static final String L_HIST = "hist";
+    public static final String L_SEARCH = "search";
 
     /**
      * ID of search history entries
      */
-    public static final String L_HIST_ID = "hist_id";
+    public static final String L_SEARCH_ID = "search_id";
 
     /**
      * field operator: structured data storage
@@ -231,8 +231,8 @@ public final class LuceneFields {
         CONTACT_DATA(L_CONTACT_DATA, Field.Store.NO, Field.Index.ANALYZED),
         OBJECTS(L_OBJECTS, Field.Store.NO, Field.Index.ANALYZED),
         VERSION(L_VERSION, Field.Store.YES, Field.Index.NOT_ANALYZED),
-        HISTORY(L_HIST, Field.Store.NO, Field.Index.ANALYZED),
-        HISTORY_ID(L_HIST_ID, Field.Store.YES, Field.Index.NOT_ANALYZED);
+        SEARCH(L_SEARCH, Field.Store.NO, Field.Index.ANALYZED),
+        SEARCH_ID(L_SEARCH_ID, Field.Store.YES, Field.Index.NOT_ANALYZED);
 
         private String fieldName;
         private Field.Store storeSetting;

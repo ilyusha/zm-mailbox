@@ -205,4 +205,14 @@ public final class IndexDocument {
                 Field.Store.YES, Field.Index.NOT_ANALYZED));
     }
 
+    //fields for search history index
+
+    public void addSearch(String search) {
+        document.add(new Field(LuceneFields.L_SEARCH, search, Field.Store.NO, Field.Index.ANALYZED));
+    }
+
+    public void addSearchId(int id) {
+        document.add(new Field(LuceneFields.L_SEARCH_ID, String.valueOf(id), Field.Store.YES, Field.Index.NOT_ANALYZED));
+    }
+
 }

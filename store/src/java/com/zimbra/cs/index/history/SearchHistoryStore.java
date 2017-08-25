@@ -1,5 +1,6 @@
 package com.zimbra.cs.index.history;
 
+import java.rmi.ServerError;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +17,7 @@ public class SearchHistoryStore {
     private static SearchHistoryStore instance;
 
     static {
-        setFactory(InMemorySearchHistoryFactory.class);
+        setFactory(ZimbraSearchHistoryFactory.class);
     }
 
     public static synchronized SearchHistoryStore getInstance() {
@@ -51,15 +52,15 @@ public class SearchHistoryStore {
         add(mbox, searchString, System.currentTimeMillis());
         }
 
-    private HistoryMetadataStore getMetadata(Mailbox mbox) {
+    private HistoryMetadataStore getMetadata(Mailbox mbox) throws ServiceException {
         return factory.getMetadataStore(mbox);
     }
 
-    private HistoryIndex getIndex(Mailbox mbox) {
+    private HistoryIndex getIndex(Mailbox mbox) throws ServiceException {
         return factory.getIndex(mbox);
     }
 
-    private HistoryConfig getConfig(Mailbox mbox) {
+    private HistoryConfig getConfig(Mailbox mbox) throws ServiceException {
         return factory.getConfig(mbox);
     }
 
@@ -183,10 +184,10 @@ public class SearchHistoryStore {
     }
 
     public static interface Factory {
-        public HistoryIndex getIndex(Mailbox mbox);
-        public HistoryMetadataStore getMetadataStore(Mailbox mbox);
-        public HistoryConfig getConfig(Mailbox mbox);
-        public SavedSearchPromptLog getSavedSearchPromptLog(Mailbox mbox);
+        public HistoryIndex getIndex(Mailbox mbox) throws ServiceException;
+        public HistoryMetadataStore getMetadataStore(Mailbox mbox) throws ServiceException;
+        public HistoryConfig getConfig(Mailbox mbox) throws ServiceException;
+        public SavedSearchPromptLog getSavedSearchPromptLog(Mailbox mbox) throws ServiceException;
     }
 
     public static class SearchHistoryMetadataParams {

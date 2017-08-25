@@ -159,6 +159,8 @@ public final class ZimbraAnalyzer extends Analyzer {
             return new ContactTokenFilter(new AddrCharTokenizer(reader)); // for bug 48146
         } else if (field.equals(LuceneFields.L_FILENAME)) {
             return new FilenameTokenizer(reader);
+        } else if (field.equals(LuceneFields.L_SEARCH)) {
+            return new KeywordTokenizer(reader);
         } else {
             return analyzer.tokenStream(field, new HalfwidthKanaVoicedMappingFilter((reader)));
         }

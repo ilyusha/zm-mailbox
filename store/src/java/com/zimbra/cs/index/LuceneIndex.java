@@ -905,8 +905,14 @@ public final class LuceneIndex extends IndexStore {
          */
         @Override
         public void deleteDocument(List<Integer> ids) throws IOException {
+            deleteDocument(ids, LuceneFields.L_MAILBOX_BLOB_ID);
+        }
+
+        @Override
+        public void deleteDocument(List<Integer> ids, String fieldName)
+                throws IOException {
             for (Integer id : ids) {
-                Term term = new Term(LuceneFields.L_MAILBOX_BLOB_ID, id.toString());
+                Term term = new Term(fieldName, id.toString());
                 writer.get().deleteDocuments(term);
                 ZimbraLog.index.debug("Deleted documents id=%d", id);
             }
