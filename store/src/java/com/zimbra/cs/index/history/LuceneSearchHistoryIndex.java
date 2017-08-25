@@ -18,6 +18,7 @@ import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Account;
 import com.zimbra.cs.index.IndexDocument;
 import com.zimbra.cs.index.IndexStore;
+import com.zimbra.cs.index.Indexer;
 import com.zimbra.cs.index.LuceneFields;
 import com.zimbra.cs.index.ZimbraIndexSearcher;
 import com.zimbra.cs.index.ZimbraScoreDoc;
@@ -42,7 +43,9 @@ public class LuceneSearchHistoryIndex implements HistoryIndex{
         doc.addSearch(searchString);
         doc.addSearchId(id);
         try {
-            index.openIndexer().addDocument(doc);
+            Indexer indexer = index.openIndexer();
+            indexer.addDocument(doc);
+            indexer.close();
         } catch (IOException e) {
             ZimbraLog.search.error("unable to index search history entry %s", searchString, e);
         }
