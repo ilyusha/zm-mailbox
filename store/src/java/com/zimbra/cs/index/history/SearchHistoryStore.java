@@ -74,7 +74,7 @@ public class SearchHistoryStore {
             mdStore.update(searchString, millis);
         } else {
             int id = mdStore.add(searchString, millis);
-            index.add(id, searchString);
+            index.add(id, searchString, millis);
         }
     }
 
@@ -287,9 +287,9 @@ public class SearchHistoryStore {
     public static interface HistoryIndex {
 
         /**
-         * Add a search history entry to the index with the given ID
+         * Add a search history entry to the index with the given ID and timestamp
          */
-        public void add(int id, String entry) throws ServiceException;
+        public void add(int id, String entry, long timestamp) throws ServiceException;
 
         /**
          * Search the index for IDs of matching entries

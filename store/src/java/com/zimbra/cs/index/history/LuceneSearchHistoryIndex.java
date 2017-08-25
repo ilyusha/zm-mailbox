@@ -8,8 +8,6 @@ import java.util.List;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.ConstantScoreQuery;
-import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
@@ -41,8 +39,8 @@ public class LuceneSearchHistoryIndex implements HistoryIndex{
     }
 
     @Override
-    public void add(int id, String searchString) throws ServiceException {
-        IndexDocument doc = IndexDocument.fromSearchString(id, searchString, System.currentTimeMillis());
+    public void add(int id, String searchString, long timestamp) throws ServiceException {
+        IndexDocument doc = IndexDocument.fromSearchString(id, searchString, timestamp);
         try {
             Indexer indexer = index.openIndexer();
             indexer.addDocument(doc);

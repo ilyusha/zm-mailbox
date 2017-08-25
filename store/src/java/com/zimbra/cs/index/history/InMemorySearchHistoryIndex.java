@@ -20,7 +20,7 @@ public class InMemorySearchHistoryIndex implements SearchHistoryStore.HistoryInd
 
 
     @Override
-    public void add(int id, String entry) throws ServiceException {
+    public void add(int id, String entry, long millis) throws ServiceException {
         for (int i = 1; i <= entry.length(); i++) {
             String prefix = entry.substring(0, i);
             prefixMap.put(prefix, id);
