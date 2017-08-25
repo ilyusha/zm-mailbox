@@ -131,6 +131,7 @@ import com.zimbra.cs.index.SearchParams;
 import com.zimbra.cs.index.SortBy;
 import com.zimbra.cs.index.ZimbraQuery;
 import com.zimbra.cs.index.ZimbraQueryResults;
+import com.zimbra.cs.index.history.SearchHistoryStore;
 import com.zimbra.cs.ldap.LdapConstants;
 import com.zimbra.cs.mailbox.CalendarItem.AlarmData;
 import com.zimbra.cs.mailbox.CalendarItem.Callback;
@@ -1877,7 +1878,7 @@ public class Mailbox implements MailboxStore {
             SortedSet<String> clientIds= new TreeSet<String>(mData.configKeys);
             for (String key : clientIds) {
                 if (pattern.matcher(key).matches()) {
-                   
+
                     previousDeviceId = key;
                     if (previousDeviceId.indexOf(":") != -1) {
                         int index = previousDeviceId.indexOf(":");
@@ -1887,7 +1888,7 @@ public class Mailbox implements MailboxStore {
                     if (!tmp.contains("build")) {
                         break;
                     }
-                    
+
                 }
             }
         }
@@ -2465,6 +2466,8 @@ public class Mailbox implements MailboxStore {
                     } catch (IOException iox) {
                         ZimbraLog.store.warn("Unable to delete index data", iox);
                     }
+                    //delete search history
+                    SearchHistoryStore.getInstance().deleteHistory(this);
 
                     if (deleteStore) {
                         try {
