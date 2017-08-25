@@ -31,6 +31,9 @@ import com.zimbra.cs.index.analysis.RFC822AddressTokenStream;
  * @author ysasaki
  */
 public final class IndexDocument {
+
+    private static final String SEARCH_HISTORY_TYPE = "sh";
+
     private final Document document;
 
     public IndexDocument() {
@@ -207,12 +210,13 @@ public final class IndexDocument {
 
     //fields for search history index
 
-    public void addSearch(String search) {
-        document.add(new Field(LuceneFields.L_SEARCH, search, Field.Store.NO, Field.Index.ANALYZED));
-    }
-
-    public void addSearchId(int id) {
-        document.add(new Field(LuceneFields.L_SEARCH_ID, String.valueOf(id), Field.Store.YES, Field.Index.NOT_ANALYZED));
+    public static IndexDocument fromSearchString(int id, String searchString, long timestamp) {
+        IndexDocument doc = new IndexDocument();
+        doc.addSortDate(timestamp);
+        doc.document.add(new Field(LuceneFields.L_SEARCH, searchString, Field.Store.NO, Field.Index.ANALYZED));
+        doc.document.add(new Field(LuceneFields.L_SEARCH_ID, String.valueOf(id), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        doc.document.add(new Field(LuceneFields.L_ITEM_TYPE, SEARCH_HISTORY_TYPE, Field.Store.YES, Field.Index.NOT_ANALYZED));
+        return doc;
     }
 
 }

@@ -202,6 +202,11 @@ public final class LuceneFields {
     public static final String L_SEARCH_ID = "search_id";
 
     /**
+     * Item type; used to differentiate search history entries from mail items
+     */
+    public static final String L_ITEM_TYPE = "type";
+
+    /**
      * field operator: structured data storage
      */
     public static final String L_FIELD = "l.field";
