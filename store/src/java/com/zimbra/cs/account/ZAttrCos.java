@@ -12163,6 +12163,78 @@ public abstract class ZAttrCos extends NamedEntry {
     }
 
     /**
+     * Whether to enable Search History
+     *
+     * @return zimbraFeatureSearchHistoryEnabled, or true if unset
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3020)
+    public boolean isFeatureSearchHistoryEnabled() {
+        return getBooleanAttr(Provisioning.A_zimbraFeatureSearchHistoryEnabled, true, true);
+    }
+
+    /**
+     * Whether to enable Search History
+     *
+     * @param zimbraFeatureSearchHistoryEnabled new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3020)
+    public void setFeatureSearchHistoryEnabled(boolean zimbraFeatureSearchHistoryEnabled) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraFeatureSearchHistoryEnabled, zimbraFeatureSearchHistoryEnabled ? Provisioning.TRUE : Provisioning.FALSE);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Whether to enable Search History
+     *
+     * @param zimbraFeatureSearchHistoryEnabled new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3020)
+    public Map<String,Object> setFeatureSearchHistoryEnabled(boolean zimbraFeatureSearchHistoryEnabled, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraFeatureSearchHistoryEnabled, zimbraFeatureSearchHistoryEnabled ? Provisioning.TRUE : Provisioning.FALSE);
+        return attrs;
+    }
+
+    /**
+     * Whether to enable Search History
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3020)
+    public void unsetFeatureSearchHistoryEnabled() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraFeatureSearchHistoryEnabled, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Whether to enable Search History
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3020)
+    public Map<String,Object> unsetFeatureSearchHistoryEnabled(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraFeatureSearchHistoryEnabled, "");
+        return attrs;
+    }
+
+    /**
      * enabled sharing
      *
      * @return zimbraFeatureSharingEnabled, or true if unset
@@ -26074,6 +26146,88 @@ public abstract class ZAttrCos extends NamedEntry {
     public Map<String,Object> unsetNotes(Map<String,Object> attrs) {
         if (attrs == null) attrs = new HashMap<String,Object>();
         attrs.put(Provisioning.A_zimbraNotes, "");
+        return attrs;
+    }
+
+    /**
+     * Searching for the same query this many times will result in a prompt
+     * offering the user to save this query as a search folder. This will
+     * only happen once per query. A value of 0 disables this feature.
+     *
+     * @return zimbraNumSearchesForSavedSearchPrompt, or 3 if unset
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3023)
+    public int getNumSearchesForSavedSearchPrompt() {
+        return getIntAttr(Provisioning.A_zimbraNumSearchesForSavedSearchPrompt, 3, true);
+    }
+
+    /**
+     * Searching for the same query this many times will result in a prompt
+     * offering the user to save this query as a search folder. This will
+     * only happen once per query. A value of 0 disables this feature.
+     *
+     * @param zimbraNumSearchesForSavedSearchPrompt new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3023)
+    public void setNumSearchesForSavedSearchPrompt(int zimbraNumSearchesForSavedSearchPrompt) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraNumSearchesForSavedSearchPrompt, Integer.toString(zimbraNumSearchesForSavedSearchPrompt));
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Searching for the same query this many times will result in a prompt
+     * offering the user to save this query as a search folder. This will
+     * only happen once per query. A value of 0 disables this feature.
+     *
+     * @param zimbraNumSearchesForSavedSearchPrompt new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3023)
+    public Map<String,Object> setNumSearchesForSavedSearchPrompt(int zimbraNumSearchesForSavedSearchPrompt, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraNumSearchesForSavedSearchPrompt, Integer.toString(zimbraNumSearchesForSavedSearchPrompt));
+        return attrs;
+    }
+
+    /**
+     * Searching for the same query this many times will result in a prompt
+     * offering the user to save this query as a search folder. This will
+     * only happen once per query. A value of 0 disables this feature.
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3023)
+    public void unsetNumSearchesForSavedSearchPrompt() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraNumSearchesForSavedSearchPrompt, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Searching for the same query this many times will result in a prompt
+     * offering the user to save this query as a search folder. This will
+     * only happen once per query. A value of 0 disables this feature.
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3023)
+    public Map<String,Object> unsetNumSearchesForSavedSearchPrompt(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraNumSearchesForSavedSearchPrompt, "");
         return attrs;
     }
 
@@ -42731,6 +42885,207 @@ public abstract class ZAttrCos extends NamedEntry {
     public Map<String,Object> unsetRevokeAppSpecificPasswordsOnPasswordChange(Map<String,Object> attrs) {
         if (attrs == null) attrs = new HashMap<String,Object>();
         attrs.put(Provisioning.A_zimbraRevokeAppSpecificPasswordsOnPasswordChange, "");
+        return attrs;
+    }
+
+    /**
+     * Search history entries older than this will not show up in search
+     * suggestions and will not be included in the count used for
+     * zimbraNumSearchesForSavedSearchPrompt; they are also eligible to be
+     * permanently deleted. Must be in valid duration format:
+     * {digits}{time-unit}. digits: 0-9, time-unit: [hmsd]|ms. h - hours, m -
+     * minutes, s - seconds, d - days, ms - milliseconds. If time unit is not
+     * specified, the default is s(seconds).
+     *
+     * <p>Use getSearchHistoryDurationAsString to access value as a string.
+     *
+     * @see #getSearchHistoryDurationAsString()
+     *
+     * @return zimbraSearchHistoryDuration in millseconds, or 31536000000 (365d)  if unset
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3021)
+    public long getSearchHistoryDuration() {
+        return getTimeInterval(Provisioning.A_zimbraSearchHistoryDuration, 31536000000L, true);
+    }
+
+    /**
+     * Search history entries older than this will not show up in search
+     * suggestions and will not be included in the count used for
+     * zimbraNumSearchesForSavedSearchPrompt; they are also eligible to be
+     * permanently deleted. Must be in valid duration format:
+     * {digits}{time-unit}. digits: 0-9, time-unit: [hmsd]|ms. h - hours, m -
+     * minutes, s - seconds, d - days, ms - milliseconds. If time unit is not
+     * specified, the default is s(seconds).
+     *
+     * @return zimbraSearchHistoryDuration, or "365d" if unset
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3021)
+    public String getSearchHistoryDurationAsString() {
+        return getAttr(Provisioning.A_zimbraSearchHistoryDuration, "365d", true);
+    }
+
+    /**
+     * Search history entries older than this will not show up in search
+     * suggestions and will not be included in the count used for
+     * zimbraNumSearchesForSavedSearchPrompt; they are also eligible to be
+     * permanently deleted. Must be in valid duration format:
+     * {digits}{time-unit}. digits: 0-9, time-unit: [hmsd]|ms. h - hours, m -
+     * minutes, s - seconds, d - days, ms - milliseconds. If time unit is not
+     * specified, the default is s(seconds).
+     *
+     * @param zimbraSearchHistoryDuration new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3021)
+    public void setSearchHistoryDuration(String zimbraSearchHistoryDuration) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraSearchHistoryDuration, zimbraSearchHistoryDuration);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Search history entries older than this will not show up in search
+     * suggestions and will not be included in the count used for
+     * zimbraNumSearchesForSavedSearchPrompt; they are also eligible to be
+     * permanently deleted. Must be in valid duration format:
+     * {digits}{time-unit}. digits: 0-9, time-unit: [hmsd]|ms. h - hours, m -
+     * minutes, s - seconds, d - days, ms - milliseconds. If time unit is not
+     * specified, the default is s(seconds).
+     *
+     * @param zimbraSearchHistoryDuration new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3021)
+    public Map<String,Object> setSearchHistoryDuration(String zimbraSearchHistoryDuration, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraSearchHistoryDuration, zimbraSearchHistoryDuration);
+        return attrs;
+    }
+
+    /**
+     * Search history entries older than this will not show up in search
+     * suggestions and will not be included in the count used for
+     * zimbraNumSearchesForSavedSearchPrompt; they are also eligible to be
+     * permanently deleted. Must be in valid duration format:
+     * {digits}{time-unit}. digits: 0-9, time-unit: [hmsd]|ms. h - hours, m -
+     * minutes, s - seconds, d - days, ms - milliseconds. If time unit is not
+     * specified, the default is s(seconds).
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3021)
+    public void unsetSearchHistoryDuration() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraSearchHistoryDuration, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Search history entries older than this will not show up in search
+     * suggestions and will not be included in the count used for
+     * zimbraNumSearchesForSavedSearchPrompt; they are also eligible to be
+     * permanently deleted. Must be in valid duration format:
+     * {digits}{time-unit}. digits: 0-9, time-unit: [hmsd]|ms. h - hours, m -
+     * minutes, s - seconds, d - days, ms - milliseconds. If time unit is not
+     * specified, the default is s(seconds).
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3021)
+    public Map<String,Object> unsetSearchHistoryDuration(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraSearchHistoryDuration, "");
+        return attrs;
+    }
+
+    /**
+     * Maximum number of search suggestions to be returned based on search
+     * history. A value of 0 disables the limit
+     *
+     * @return zimbraSearchHistorySuggestLimit, or 5 if unset
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3022)
+    public int getSearchHistorySuggestLimit() {
+        return getIntAttr(Provisioning.A_zimbraSearchHistorySuggestLimit, 5, true);
+    }
+
+    /**
+     * Maximum number of search suggestions to be returned based on search
+     * history. A value of 0 disables the limit
+     *
+     * @param zimbraSearchHistorySuggestLimit new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3022)
+    public void setSearchHistorySuggestLimit(int zimbraSearchHistorySuggestLimit) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraSearchHistorySuggestLimit, Integer.toString(zimbraSearchHistorySuggestLimit));
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Maximum number of search suggestions to be returned based on search
+     * history. A value of 0 disables the limit
+     *
+     * @param zimbraSearchHistorySuggestLimit new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3022)
+    public Map<String,Object> setSearchHistorySuggestLimit(int zimbraSearchHistorySuggestLimit, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraSearchHistorySuggestLimit, Integer.toString(zimbraSearchHistorySuggestLimit));
+        return attrs;
+    }
+
+    /**
+     * Maximum number of search suggestions to be returned based on search
+     * history. A value of 0 disables the limit
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3022)
+    public void unsetSearchHistorySuggestLimit() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraSearchHistorySuggestLimit, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Maximum number of search suggestions to be returned based on search
+     * history. A value of 0 disables the limit
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.1
+     */
+    @ZAttr(id=3022)
+    public Map<String,Object> unsetSearchHistorySuggestLimit(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraSearchHistorySuggestLimit, "");
         return attrs;
     }
 
