@@ -8,10 +8,13 @@ import java.util.List;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.ConstantScoreQuery;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.TermQuery;
 
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.ZimbraLog;
@@ -22,6 +25,7 @@ import com.zimbra.cs.index.Indexer;
 import com.zimbra.cs.index.LuceneFields;
 import com.zimbra.cs.index.ZimbraIndexSearcher;
 import com.zimbra.cs.index.ZimbraScoreDoc;
+import com.zimbra.cs.index.ZimbraTopDocs;
 import com.zimbra.cs.index.ZimbraTopFieldDocs;
 import com.zimbra.cs.index.history.SearchHistoryStore.HistoryIndex;
 import com.zimbra.cs.mailbox.Mailbox;
@@ -38,10 +42,7 @@ public class LuceneSearchHistoryIndex implements HistoryIndex{
 
     @Override
     public void add(int id, String searchString) throws ServiceException {
-        IndexDocument doc = new IndexDocument();
-        doc.addSortDate(System.currentTimeMillis());
-        doc.addSearch(searchString);
-        doc.addSearchId(id);
+        IndexDocument doc = IndexDocument.fromSearchString(id, searchString, System.currentTimeMillis());
         try {
             Indexer indexer = index.openIndexer();
             indexer.addDocument(doc);
@@ -84,7 +85,21 @@ public class LuceneSearchHistoryIndex implements HistoryIndex{
 
     @Override
     public void deleteAll() throws ServiceException {
-        // TODO Auto-generated method stub
-
+        Term term = new Term(LuceneFields.L_ITEM_TYPE, "sh");
+        Query query = new TermQuery(term);
+        ZimbraIndexSearcher searcher;
+        try {
+            searcher = index.openSearcher();
+            int historySize = searcher.docFreq(term);
+            ZimbraTopDocs docs = searcher.search(query, historySize);
+            List<Integer> entryIds = new ArrayList<Integer>(docs.getTotalHits());
+            for (ZimbraScoreDoc scoreDoc: docs.getScoreDocs()) {
+                Document doc =  searcher.doc(scoreDoc.getDocumentID());
+                entryIds.add(Integer.parseInt(doc.get(LuceneFields.L_SEARCH_ID)));
+            }
+            delete(entryIds);
+        } catch (IOException e) {
+            ZimbraLog.search.error("unable to delete search history", e);
+        }
     }
 }
