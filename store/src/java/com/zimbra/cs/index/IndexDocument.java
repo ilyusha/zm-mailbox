@@ -32,7 +32,7 @@ import com.zimbra.cs.index.analysis.RFC822AddressTokenStream;
  */
 public final class IndexDocument {
 
-    private static final String SEARCH_HISTORY_TYPE = "sh";
+    public static final String SEARCH_HISTORY_TYPE = "sh";
 
     private final Document document;
 

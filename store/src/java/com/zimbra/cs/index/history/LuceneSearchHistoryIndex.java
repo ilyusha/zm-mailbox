@@ -75,7 +75,9 @@ public class LuceneSearchHistoryIndex implements HistoryIndex{
     public void delete(Collection<Integer> ids) throws ServiceException {
         List<Integer> idList = new ArrayList<Integer>(ids);
         try {
-            index.openIndexer().deleteDocument(idList, LuceneFields.L_SEARCH_ID);
+            Indexer indexer = index.openIndexer();
+            indexer.deleteDocument(idList, LuceneFields.L_SEARCH_ID);
+            indexer.close();
         } catch (IOException e) {
             ZimbraLog.search.error("unable to delete %s search history docs from the index", ids.size(), e);
         }
@@ -83,12 +85,15 @@ public class LuceneSearchHistoryIndex implements HistoryIndex{
 
     @Override
     public void deleteAll() throws ServiceException {
-        Term term = new Term(LuceneFields.L_ITEM_TYPE, "sh");
+        Term term = new Term(LuceneFields.L_ITEM_TYPE, IndexDocument.SEARCH_HISTORY_TYPE);
         Query query = new TermQuery(term);
         ZimbraIndexSearcher searcher;
         try {
             searcher = index.openSearcher();
             int historySize = searcher.docFreq(term);
+            if (historySize == 0) {
+                return; //nothing to do
+            }
             ZimbraTopDocs docs = searcher.search(query, historySize);
             List<Integer> entryIds = new ArrayList<Integer>(docs.getTotalHits());
             for (ZimbraScoreDoc scoreDoc: docs.getScoreDocs()) {
