@@ -60,10 +60,11 @@ public class SearchHistoryTest {
     @Test
     public void testInMemorySearchHistoryIndex() throws Exception {
         InMemorySearchHistoryIndex index = new InMemorySearchHistoryIndex();
-        index.add(1, "search1");
-        index.add(2, "search2");
-        index.add(3, "foo1");
-        index.add(4, "foo2");
+        long timestamp = System.currentTimeMillis();
+        index.add(1, "search1", timestamp);
+        index.add(2, "search2", timestamp);
+        index.add(3, "foo1", timestamp);
+        index.add(4, "foo2", timestamp);
 
         String[] prefixes = new String[] {
                 "s", "se", "sea", "sear", "searc", "search",
