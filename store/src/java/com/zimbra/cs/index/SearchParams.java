@@ -554,7 +554,7 @@ public final class SearchParams implements Cloneable, ZimbraSearchParams {
             SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
             String id = zsc.getRequestedAccountId();
             Mailbox mbox = MailboxManager.getInstance().getMailboxByAccountId(id);
-            if (SearchHistoryStore.shouldSaveInHistory(query)) {
+            if (SearchHistoryStore.featureEnabled(mbox) && SearchHistoryStore.shouldSaveInHistory(query)) {
                 searchHistory.add(mbox, query);
             }
         }

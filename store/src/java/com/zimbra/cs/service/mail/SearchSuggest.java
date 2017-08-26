@@ -1,5 +1,7 @@
 package com.zimbra.cs.service.mail;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Strings;
@@ -24,7 +26,8 @@ public class SearchSuggest extends MailDocumentHandler {
         SearchHistoryParams params = getSearchHistoryParams(zsc, req);
         SearchSuggestResponse resp = new SearchSuggestResponse();
         SearchHistoryStore store = SearchHistoryStore.getInstance();
-        resp.setSearches(store.getHistory(mbox, params));
+        List<String> results = SearchHistoryStore.featureEnabled(mbox) ? store.getHistory(mbox, params) : Collections.emptyList();
+        resp.setSearches(results);
         return zsc.jaxbToElement(resp);
     }
 
