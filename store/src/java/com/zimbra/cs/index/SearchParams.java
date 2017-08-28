@@ -546,18 +546,7 @@ public final class SearchParams implements Cloneable, ZimbraSearchParams {
         params.setHopCount(zsc.getHopCount());
         params.setCalItemExpandStart(Objects.firstNonNull(soapParams.getCalItemExpandStart(), -1L));
         params.setCalItemExpandEnd(Objects.firstNonNull(soapParams.getCalItemExpandEnd(), -1L));
-        String query;
-        if (soapParams.getQuery() == null) {
-            query = defaultQueryStr;
-        } else {
-            query = soapParams.getQuery();
-            SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
-            String id = zsc.getRequestedAccountId();
-            Mailbox mbox = MailboxManager.getInstance().getMailboxByAccountId(id);
-            if (SearchHistoryStore.featureEnabled(mbox) && SearchHistoryStore.shouldSaveInHistory(query)) {
-                searchHistory.add(mbox, query);
-            }
-        }
+        String query = soapParams.getQuery() == null ? defaultQueryStr : soapParams.getQuery();
         if (query == null) {
             throw ServiceException.INVALID_REQUEST("no query submitted and no default query found", null);
         }

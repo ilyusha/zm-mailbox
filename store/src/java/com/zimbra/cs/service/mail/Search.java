@@ -87,7 +87,12 @@ public class Search extends MailDocumentHandler  {
             return zsc.createElement(MailConstants.SEARCH_RESPONSE);
         }
 
-        SearchParams params = SearchParams.parse(req, zsc, account.getPrefMailInitialSearch());
+        String defaultSearch = account.getPrefMailInitialSearch();
+        SearchParams params = SearchParams.parse(req, zsc, defaultSearch);
+        if (!defaultSearch.equals(params.getQueryString()) && SearchHistoryStore.featureEnabled(mbox)
+                && SearchHistoryStore.shouldSaveInHistory(params)) {
+            mbox.addToSearchHistory(octxt, params.getQueryString());
+        }
         if (params.getLocale() == null) {
             params.setLocale(mbox.getAccount().getLocale());
         }
