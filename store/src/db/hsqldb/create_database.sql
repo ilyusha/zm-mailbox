@@ -250,3 +250,25 @@ CREATE TABLE *{DATABASE_NAME}.data_source_item (
    CONSTRAINT i_remote_id UNIQUE (mailbox_id, data_source_id, remote_id),
    CONSTRAINT fk_data_source_item_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE
 );
+
+-- Search History
+
+CREATE TABLE IF NOT EXISTS ${DATABASE_NAME}.searches (
+   mailbox_id     INTEGER UNSIGNED NOT NULL,
+   id             INTEGER UNSIGNED NOT NULL, -- ID of the query string
+   search         VARCHAR(255), -- the search query string
+   status         TINYINT, -- status of the saved search prompt: 1 = prompted; 2 = accepted; 3 = rejected
+
+   PRIMARY KEY (mailbox_id, search_id),
+   INDEX i_search (mailbox_id, search), -- for checking existence
+   CONSTRAINT fk_search_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS $DATABASE_NAME}.search_history (
+   mailbox_id    INTEGER UNSIGNED NOT NULL,
+   search_id     INTEGER UNSIGNED NOT NULL,
+   date          INTEGER UNSIGNED NOT NULL,
+
+   CONSTRAINT fk_search_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE
+   CONSTRAINT fk_search_id FOREIGN KEY (search_id) REFERENCES ${DATABASE_NAME}.searches(id) ON DELETE CASCADE
+) ENGINE = InnoDB;
