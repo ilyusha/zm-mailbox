@@ -210,9 +210,8 @@ public final class IndexDocument {
 
     //fields for search history index
 
-    public static IndexDocument fromSearchString(int id, String searchString, long timestamp) {
+    public static IndexDocument fromSearchString(int id, String searchString) {
         IndexDocument doc = new IndexDocument();
-        doc.addSortDate(timestamp);
         doc.document.add(new Field(LuceneFields.L_SEARCH, searchString, Field.Store.NO, Field.Index.ANALYZED));
         doc.document.add(new Field(LuceneFields.L_SEARCH_ID, String.valueOf(id), Field.Store.YES, Field.Index.NOT_ANALYZED));
         doc.document.add(new Field(LuceneFields.L_ITEM_TYPE, SEARCH_HISTORY_TYPE, Field.Store.YES, Field.Index.NOT_ANALYZED));
