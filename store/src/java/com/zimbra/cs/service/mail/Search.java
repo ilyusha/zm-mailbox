@@ -118,15 +118,16 @@ public class Search extends MailDocumentHandler  {
             // request and used something else...
             response.addAttribute(MailConstants.A_SORTBY, results.getSortBy().toString());
             putHits(zsc, octxt, response, results, params, memberOfMap);
-            putSaveSearchPrompt(octxt, response, account, mbox, params.getQueryString(), account.getPrefMailInitialSearch());
+            putSaveSearchPrompt(octxt, response, account, mbox, params, account.getPrefMailInitialSearch());
             return response;
         } finally {
             Closeables.closeQuietly(results);
         }
     }
 
-    protected void putSaveSearchPrompt(OperationContext octxt, Element response, Account acct, Mailbox mbox, String query, String defaultQuery) {
-        if (!query.equals(defaultQuery) && SearchHistoryStore.shouldSaveInHistory(query)) {
+    protected void putSaveSearchPrompt(OperationContext octxt, Element response, Account acct, Mailbox mbox, SearchParams params, String defaultQuery) {
+        String query = params.getQueryString();
+        if (!query.equals(defaultQuery) && SearchHistoryStore.shouldSaveInHistory(params)) {
             int threshold = acct.getNumSearchesForSavedSearchPrompt();
             if (threshold == 0) {
                 return; //feature disabled

@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.ZimbraLog;
+import com.zimbra.cs.index.SearchParams;
 import com.zimbra.cs.mailbox.Mailbox;
 
 public class SearchHistoryStore {
@@ -182,8 +183,8 @@ public class SearchHistoryStore {
      * This is only necessary until we add the ability for the client to specify whether a query
      * should be saved in the history
      */
-    public static boolean shouldSaveInHistory(String searchString) {
-        return !searchString.startsWith("inid:");
+    public static boolean shouldSaveInHistory(SearchParams params) {
+        return params.getOffset() == 0 && !params.getQueryString().startsWith("inid:");
     }
 
     public static interface Factory {
