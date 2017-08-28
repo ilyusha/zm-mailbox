@@ -253,22 +253,21 @@ CREATE TABLE *{DATABASE_NAME}.data_source_item (
 
 -- Search History
 
-CREATE TABLE IF NOT EXISTS ${DATABASE_NAME}.searches (
-   mailbox_id     INTEGER UNSIGNED NOT NULL,
-   id             INTEGER UNSIGNED NOT NULL, -- ID of the query string
+CREATE TABLE *{DATABASE_NAME}.searches (
+   mailbox_id     INTEGER NOT NULL,
+   id             INTEGER NOT NULL, -- ID of the query string
    search         VARCHAR(255), -- the search query string
    status         TINYINT, -- status of the saved search prompt: 1 = prompted; 2 = accepted; 3 = rejected
 
-   PRIMARY KEY (mailbox_id, search_id),
-   INDEX i_search (mailbox_id, search), -- for checking existence
-   CONSTRAINT fk_search_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE
-) ENGINE = InnoDB;
+   CONSTRAINT pk_search PRIMARY KEY (mailbox_id, id),
+   CONSTRAINT fk_searches_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE
+);
 
-CREATE TABLE IF NOT EXISTS $DATABASE_NAME}.search_history (
-   mailbox_id    INTEGER UNSIGNED NOT NULL,
-   search_id     INTEGER UNSIGNED NOT NULL,
-   date          INTEGER UNSIGNED NOT NULL,
+CREATE TABLE *{DATABASE_NAME}.search_history (
+   mailbox_id    INTEGER NOT NULL,
+   search_id     INTEGER NOT NULL,
+   date          INTEGER NOT NULL,
 
-   CONSTRAINT fk_search_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE
-   CONSTRAINT fk_search_id FOREIGN KEY (search_id) REFERENCES ${DATABASE_NAME}.searches(id) ON DELETE CASCADE
-) ENGINE = InnoDB;
+   CONSTRAINT fk_search_log_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE,
+   CONSTRAINT fk_search_id FOREIGN KEY (mailbox_id, search_id) REFERENCES searches(mailbox_id, id) ON DELETE CASCADE
+);
