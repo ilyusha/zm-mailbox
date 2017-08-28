@@ -147,11 +147,15 @@ public class SearchHistoryTest {
         int id2 = 2;
         int id3 = 3;
 
+        md.init(id1, "search1");
+        md.init(id2, "search2");
+        md.init(id3, "search3");
+
         //this search order will result in search1 -> search3 -> search2
-        md.add(1, "search1", timestamp1);
-        md.add(2, "search2", timestamp2);
-        md.add(3, "search3", timestamp3);
-        md.update("search1", timestamp4);
+        md.addSearch("search1", timestamp1);
+        md.addSearch("search2", timestamp2);
+        md.addSearch("search3", timestamp3);
+        md.addSearch("search1", timestamp4);
 
         assertTrue("search1 should exist in the metadata store", md.exists("search1"));
         assertTrue("search2 should exist in the metadata store", md.exists("search2"));
