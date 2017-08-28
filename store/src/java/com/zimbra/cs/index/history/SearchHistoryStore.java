@@ -71,7 +71,8 @@ public class SearchHistoryStore {
         if (mdStore.exists(searchString)) {
             mdStore.update(searchString, millis);
         } else {
-            int id = mdStore.add(searchString, millis);
+            int id = mbox.getLastSearchId();
+            mdStore.add(id, searchString, millis);
             index.add(id, searchString, millis);
         }
     }
@@ -310,9 +311,8 @@ public class SearchHistoryStore {
 
         /**
          * Store a search history entry in the metadata store.
-         * Returns the ID of the entry.
          */
-        public int add(String entry, long timestamp) throws ServiceException;
+        public void add(int id, String searchString, long timestamp) throws ServiceException;
 
         /**
          * Search the metadata store for matching entries

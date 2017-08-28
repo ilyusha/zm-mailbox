@@ -132,6 +132,7 @@ import com.zimbra.cs.index.SortBy;
 import com.zimbra.cs.index.ZimbraQuery;
 import com.zimbra.cs.index.ZimbraQueryResults;
 import com.zimbra.cs.index.history.SearchHistoryStore;
+import com.zimbra.cs.index.history.SearchHistoryStore.SearchHistoryParams;
 import com.zimbra.cs.ldap.LdapConstants;
 import com.zimbra.cs.mailbox.CalendarItem.AlarmData;
 import com.zimbra.cs.mailbox.CalendarItem.Callback;
@@ -324,6 +325,7 @@ public class Mailbox implements MailboxStore {
         public Set<String> configKeys;
         public MailboxVersion version;
         public int itemcacheCheckpoint;
+        public int lastSearchId;
 
         @Override
         protected MailboxData clone() {
@@ -346,6 +348,7 @@ public class Mailbox implements MailboxStore {
             }
             mbd.version = version;
             mbd.itemcacheCheckpoint = itemcacheCheckpoint;
+            mbd.lastSearchId = lastSearchId;
             return mbd;
         }
     }
@@ -1206,6 +1209,10 @@ public class Mailbox implements MailboxStore {
 
     public int getItemcacheCheckpoint() {
         return mData.itemcacheCheckpoint;
+    }
+
+    public int getLastSearchId() {
+        return mData.lastSearchId;
     }
 
     /**
@@ -10413,4 +10420,8 @@ public class Mailbox implements MailboxStore {
         // do nothing
     }
 
+    public void addToSearchHistory(String searchString) throws ServiceException {
+        SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
+        searchHistory.add(this, searchString);
+    }
 }

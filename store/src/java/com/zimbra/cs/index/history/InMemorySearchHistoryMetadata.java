@@ -23,7 +23,6 @@ import com.zimbra.cs.index.history.SearchHistoryStore.SearchHistoryMetadataParam
  */
 public class InMemorySearchHistoryMetadata implements SearchHistoryStore.HistoryMetadataStore {
 
-    private int lastID = 0;
     //ids of search entries
     private Map<String, Integer> idMap = new HashMap<String, Integer>();
     //running list of search entries
@@ -32,18 +31,15 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
     private HashMultimap<String, EntryInfo> buckets = HashMultimap.create();
 
     @Override
-    public int add(String searchString, long timestamp) throws ServiceException {
+    public void add(int id, String searchString, long timestamp) throws ServiceException {
         if (idMap.containsKey(searchString)) {
             throw ServiceException.FAILURE(searchString + " already exists", null);
         }
-        int newId = ++lastID;
-        idMap.put(searchString, newId);
-        ZimbraLog.search.debug("added new search history entry %s with id %s", searchString, newId);
-        EntryInfo info = new EntryInfo(newId, searchString, timestamp);
+        idMap.put(searchString, id);
+        ZimbraLog.search.debug("added new search history entry %s with id %s", searchString, id);
+        EntryInfo info = new EntryInfo(id, searchString, timestamp);
         history.add(0, info);
         buckets.put(searchString, info);
-        lastID = newId;
-        return newId;
     }
 
     @Override

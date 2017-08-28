@@ -140,11 +140,14 @@ public class SearchHistoryTest {
         long timestamp2 = timestamp1 + 1000;
         long timestamp3 = timestamp1 + 2000;
         long timestamp4 = timestamp1 + 3000;
+        int id1 = 1;
+        int id2 = 2;
+        int id3 = 3;
 
         //this search order will result in search1 -> search3 -> search2
-        int id1 = md.add("search1", timestamp1);
-        int id2 = md.add("search2", timestamp2);
-        int id3 = md.add("search3", timestamp3);
+        md.add(1, "search1", timestamp1);
+        md.add(2, "search2", timestamp2);
+        md.add(3, "search3", timestamp3);
         md.update("search1", timestamp4);
 
         assertTrue("search1 should exist in the metadata store", md.exists("search1"));
