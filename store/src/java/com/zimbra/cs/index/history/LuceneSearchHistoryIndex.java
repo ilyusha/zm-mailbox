@@ -10,8 +10,6 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 
 import com.zimbra.common.service.ServiceException;
@@ -24,7 +22,6 @@ import com.zimbra.cs.index.LuceneFields;
 import com.zimbra.cs.index.ZimbraIndexSearcher;
 import com.zimbra.cs.index.ZimbraScoreDoc;
 import com.zimbra.cs.index.ZimbraTopDocs;
-import com.zimbra.cs.index.ZimbraTopFieldDocs;
 import com.zimbra.cs.index.history.SearchHistoryStore.HistoryIndex;
 import com.zimbra.cs.mailbox.Mailbox;
 
@@ -39,8 +36,8 @@ public class LuceneSearchHistoryIndex implements HistoryIndex{
     }
 
     @Override
-    public void add(int id, String searchString, long timestamp) throws ServiceException {
-        IndexDocument doc = IndexDocument.fromSearchString(id, searchString, timestamp);
+    public void add(int id, String searchString) throws ServiceException {
+        IndexDocument doc = IndexDocument.fromSearchString(id, searchString);
         try {
             Indexer indexer = index.openIndexer();
             indexer.addDocument(doc);
@@ -54,11 +51,10 @@ public class LuceneSearchHistoryIndex implements HistoryIndex{
     public Collection<Integer> search(String searchString)
             throws ServiceException {
         Query query = new PrefixQuery(new Term(LuceneFields.L_SEARCH, searchString));
-        Sort sort = new Sort(new SortField(LuceneFields.L_SORT_DATE, SortField.STRING, true));
         int numResults = acct.getSearchHistorySuggestLimit();
         try {
             ZimbraIndexSearcher searcher = index.openSearcher();
-            ZimbraTopFieldDocs docs = searcher.search(query, null, numResults, sort);
+            ZimbraTopDocs docs = searcher.search(query, null, numResults);
             List<Integer> entryIds = new ArrayList<Integer>(docs.getTotalHits());
             for (ZimbraScoreDoc scoreDoc: docs.getScoreDocs()) {
                 Document doc =  searcher.doc(scoreDoc.getDocumentID());

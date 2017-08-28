@@ -86,7 +86,7 @@ public class SearchHistoryStore {
     @VisibleForTesting
     void logSearch(Mailbox mbox, String searchString, long millis) throws ServiceException {
         HistoryMetadataStore mdStore = getMetadata(mbox);
-        mdStore.update(searchString, millis);
+        mdStore.addSearch(searchString, millis);
     }
 
     /**
@@ -337,9 +337,9 @@ public class SearchHistoryStore {
         public boolean exists(String searchString) throws ServiceException;
 
         /**
-         * Update the existing metadata entry with a new timestamp
+         * Add a new history entry for a known search
          */
-        public void update(String searchString, long millis) throws ServiceException;
+        public void addSearch(String searchString, long millis) throws ServiceException;
 
         /**
          * Delete entries with the given parameters from the metadata store and

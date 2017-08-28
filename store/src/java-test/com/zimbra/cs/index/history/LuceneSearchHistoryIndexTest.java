@@ -42,8 +42,8 @@ public class LuceneSearchHistoryIndexTest {
         mbox = MailboxManager.getInstance().getMailboxByAccount(acct);
         index = new LuceneSearchHistoryIndex(mbox);
         idxStore = IndexStore.getFactory().getIndexStore(mbox);
-        index.add(1, "test1", System.currentTimeMillis() - 1000);
-        index.add(2, "test2", System.currentTimeMillis());
+        index.add(1, "test1");
+        index.add(2, "test2");
     }
 
     @After
@@ -57,7 +57,7 @@ public class LuceneSearchHistoryIndexTest {
     public void testAdd() throws Exception {
         //verify that the index has the expected terms
         ZimbraIndexSearcher searcher = idxStore.openSearcher();
-        Query query = new TermQuery(new Term(LuceneFields.L_ITEM_TYPE, "sh"));
+        Query query = new TermQuery(new Term(LuceneFields.L_ITEM_TYPE, IndexDocument.SEARCH_HISTORY_TYPE));
         ZimbraTopDocs results = searcher.search(query, 10);
         assertEquals("should see two terms in the index", 2, results.getTotalHits());
     }

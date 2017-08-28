@@ -31,18 +31,6 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
     private HashMultimap<String, EntryInfo> buckets = HashMultimap.create();
 
     @Override
-    public void add(int id, String searchString, long timestamp) throws ServiceException {
-        if (idMap.containsKey(searchString)) {
-            throw ServiceException.FAILURE(searchString + " already exists", null);
-        }
-        idMap.put(searchString, id);
-        ZimbraLog.search.debug("added new search history entry %s with id %s", searchString, id);
-        EntryInfo info = new EntryInfo(id, searchString, timestamp);
-        history.add(0, info);
-        buckets.put(searchString, info);
-    }
-
-    @Override
     public List<String> search(SearchHistoryMetadataParams params)
             throws ServiceException {
         int numResults = params.getNumResults();
@@ -131,7 +119,7 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
     }
 
     @Override
-    public void update(String searchString, long timestamp) throws ServiceException {
+    public void addSearch(String searchString, long timestamp) throws ServiceException {
         int id = idMap.get(searchString);
         EntryInfo info = new EntryInfo(id, searchString, timestamp);
         history.add(0, info);
@@ -191,7 +179,8 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
 
     @Override
     public void init(int id, String searchString) throws ServiceException {
-        //don't need to do anything here
+        ZimbraLog.search.debug("added new search history entry %s with id %s", searchString, id);
+        idMap.put(searchString, id);
     }
 
     private static class EntryInfo {
