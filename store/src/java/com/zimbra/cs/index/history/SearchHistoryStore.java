@@ -44,13 +44,32 @@ public class SearchHistoryStore {
     }
 
     /**
-     * Add a query string to the search history
-     * @param query
-     * @throws ServiceException
+     * Return a boolean representing whether the given search string already
+     * exists in the search history for the provided mailbox
      */
-    public void add(Mailbox mbox, String searchString) throws ServiceException {
-        add(mbox, searchString, System.currentTimeMillis());
-        }
+    public boolean contains(Mailbox mbox, String searchString) throws ServiceException {
+        HistoryMetadataStore mdStore = getMetadata(mbox);
+        return mdStore.exists(searchString);
+    }
+
+    /**
+     * Add a new search string entry to the history.
+     * This must be done before an entry can be logged for the first time.
+     * @throws ServiceException if an entry with the given ID already exists
+     */
+    public void createNewEntry(Mailbox mbox, int id, String searchString) throws ServiceException {
+        HistoryMetadataStore mdStore = getMetadata(mbox);
+        mdStore.init(id, searchString);
+        HistoryIndex index = getIndex(mbox);
+        index.add(id, searchString);
+    }
+
+    /**
+     * Record a new instance for a search string already in the history
+     */
+    public void logSearch(Mailbox mbox, String searchString) throws ServiceException {
+        logSearch(mbox, searchString, System.currentTimeMillis());
+    }
 
     private HistoryMetadataStore getMetadata(Mailbox mbox) throws ServiceException {
         return factory.getMetadataStore(mbox);
@@ -65,16 +84,9 @@ public class SearchHistoryStore {
     }
 
     @VisibleForTesting
-    void add(Mailbox mbox, String searchString, long millis) throws ServiceException {
+    void logSearch(Mailbox mbox, String searchString, long millis) throws ServiceException {
         HistoryMetadataStore mdStore = getMetadata(mbox);
-        HistoryIndex index = getIndex(mbox);
-        if (mdStore.exists(searchString)) {
-            mdStore.update(searchString, millis);
-        } else {
-            int id = mbox.getLastSearchId();
-            mdStore.add(id, searchString, millis);
-            index.add(id, searchString, millis);
-        }
+        mdStore.update(searchString, millis);
     }
 
     /**
@@ -285,7 +297,7 @@ public class SearchHistoryStore {
         /**
          * Add a search history entry to the index with the given ID and timestamp
          */
-        public void add(int id, String entry, long timestamp) throws ServiceException;
+        public void add(int id, String entry) throws ServiceException;
 
         /**
          * Search the index for IDs of matching entries
@@ -312,7 +324,7 @@ public class SearchHistoryStore {
         /**
          * Store a search history entry in the metadata store.
          */
-        public void add(int id, String searchString, long timestamp) throws ServiceException;
+        public void init(int id, String searchString) throws ServiceException;
 
         /**
          * Search the metadata store for matching entries

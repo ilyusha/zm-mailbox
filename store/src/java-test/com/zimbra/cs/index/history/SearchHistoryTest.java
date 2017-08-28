@@ -44,11 +44,15 @@ public class SearchHistoryTest {
     @Before
     public void setUp() throws Exception {
         long timestamp = System.currentTimeMillis() - 4000;
-        store.add(mbox, "search1", timestamp);
-        store.add(mbox, "search2", timestamp + 1000);
-        store.add(mbox, "search3", timestamp + 2000);
-        store.add(mbox, "search1", timestamp + 3000);
-        store.add(mbox, "another", timestamp + 4000);
+        store.createNewEntry(mbox, 1, "search1");
+        store.createNewEntry(mbox, 2, "search2");
+        store.createNewEntry(mbox, 3, "search3");
+        store.createNewEntry(mbox, 4, "another");
+        store.logSearch(mbox, "search1", timestamp);
+        store.logSearch(mbox, "search2", timestamp + 1000);
+        store.logSearch(mbox, "search3", timestamp + 2000);
+        store.logSearch(mbox, "search1", timestamp + 3000);
+        store.logSearch(mbox, "another", timestamp + 4000);
     }
 
     @After
@@ -60,11 +64,10 @@ public class SearchHistoryTest {
     @Test
     public void testInMemorySearchHistoryIndex() throws Exception {
         InMemorySearchHistoryIndex index = new InMemorySearchHistoryIndex();
-        long timestamp = System.currentTimeMillis();
-        index.add(1, "search1", timestamp);
-        index.add(2, "search2", timestamp);
-        index.add(3, "foo1", timestamp);
-        index.add(4, "foo2", timestamp);
+        index.add(1, "search1");
+        index.add(2, "search2");
+        index.add(3, "foo1");
+        index.add(4, "foo2");
 
         String[] prefixes = new String[] {
                 "s", "se", "sea", "sear", "searc", "search",

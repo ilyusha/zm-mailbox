@@ -189,6 +189,11 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
         }
     }
 
+    @Override
+    public void init(int id, String searchString) throws ServiceException {
+        //don't need to do anything here
+    }
+
     private static class EntryInfo {
         private int id;
         private String searchString;
@@ -204,4 +209,5 @@ public class InMemorySearchHistoryMetadata implements SearchHistoryStore.History
         public int getID() { return id; }
 
     }
+
 }
