@@ -507,10 +507,11 @@ public final class DbMailbox {
         PreparedStatement stmt = null;
         try {
             stmt = conn.prepareStatement("UPDATE " + qualifyZimbraTableName(mbox, TABLE_MAILBOX) +
-                    " SET item_id_checkpoint = ?, contact_count = ?, change_checkpoint = ?," +
+                    " SET item_id_checkpoint = ?, search_id_checkpoint = ?, contact_count = ?, change_checkpoint = ?," +
                     "  size_checkpoint = ?, new_messages = ? WHERE id = ?");
             int pos = 1;
             stmt.setInt(pos++, mbox.getLastItemId());
+            stmt.setInt(pos++, mbox.getLastSearchId());
             stmt.setInt(pos++, mbox.getContactCount());
             stmt.setInt(pos++, mbox.getLastChangeID());
             stmt.setLong(pos++, mbox.getSize());
@@ -882,7 +883,7 @@ public final class DbMailbox {
             stmt = conn.prepareStatement(
                     "SELECT account_id," + (DebugConfig.disableMailboxGroups ? mailboxId : " group_id") + "," +
                     " size_checkpoint, contact_count, item_id_checkpoint, change_checkpoint, tracking_sync," +
-                    " tracking_imap, index_volume_id, last_soap_access, new_messages, version, itemcache_checkpoint" +
+                    " tracking_imap, index_volume_id, last_soap_access, new_messages, version, itemcache_checkpoint, search_id_checkpoint" +
                     " FROM " + qualifyZimbraTableName(mailboxId, TABLE_MAILBOX) + " WHERE id = ?");
             stmt.setInt(1, mailboxId);
 
@@ -919,6 +920,7 @@ public final class DbMailbox {
                 mbd.version = MailboxVersion.parse(version);
             }
             mbd.itemcacheCheckpoint = rs.getInt(pos++);
+            mbd.lastSearchId = rs.getInt(pos++);
 
             // round lastItemId and lastChangeId up so that they get written on the next change
             mbd.lastItemId += ITEM_CHECKPOINT_INCREMENT - 1;

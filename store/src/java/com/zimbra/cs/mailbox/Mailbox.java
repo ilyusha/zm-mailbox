@@ -385,6 +385,7 @@ public class Mailbox implements MailboxStore {
         Boolean imap = null;
         long size = NO_CHANGE;
         int itemId = NO_CHANGE;
+        int searchId = NO_CHANGE;
         int changeId = NO_CHANGE;
         int contacts = NO_CHANGE;
         int accessed = NO_CHANGE;
@@ -498,6 +499,7 @@ public class Mailbox implements MailboxStore {
             this.size = NO_CHANGE;
             this.changeId = NO_CHANGE;
             this.itemId = NO_CHANGE;
+            this.searchId = NO_CHANGE;
             this.contacts = NO_CHANGE;
             this.accessed = NO_CHANGE;
             this.recent = NO_CHANGE;
@@ -521,6 +523,8 @@ public class Mailbox implements MailboxStore {
             } else if (size != MailboxChange.NO_CHANGE) {
                 return true;
             } else if (itemId != MailboxChange.NO_CHANGE) {
+                return true;
+            } else if (searchId != MailboxChange.NO_CHANGE) {
                 return true;
             } else if (contacts != MailboxChange.NO_CHANGE) {
                 return true;
@@ -1298,6 +1302,16 @@ public class Mailbox implements MailboxStore {
 
         if (nextId > lastId) {
             currentChange().itemId = nextId;
+        }
+        return nextId;
+    }
+
+    private int getNextSearchId(int idFromRedo) {
+        int lastId = getLastSearchId();
+        int nextId = idFromRedo == ID_AUTO_INCREMENT ? lastId + 1 : idFromRedo;
+
+        if (nextId > lastId) {
+            currentChange().searchId = nextId;
         }
         return nextId;
     }
@@ -2173,6 +2187,7 @@ public class Mailbox implements MailboxStore {
             createDefaultFlags();
 
             currentChange().itemId = getInitialItemId();
+            currentChange().searchId = 1;
             DbMailbox.updateMailboxStats(this);
         } finally {
             lock.release();
@@ -9810,6 +9825,9 @@ public class Mailbox implements MailboxStore {
             if (change.itemId != MailboxChange.NO_CHANGE) {
                 mData.lastItemId = change.itemId;
             }
+            if (change.searchId != MailboxChange.NO_CHANGE) {
+                mData.lastSearchId = change.itemId;
+            }
             if (change.contacts != MailboxChange.NO_CHANGE) {
                 mData.contacts = change.contacts;
             }
@@ -10420,8 +10438,33 @@ public class Mailbox implements MailboxStore {
         // do nothing
     }
 
-    public void addToSearchHistory(String searchString) throws ServiceException {
-        SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
-        searchHistory.add(this, searchString);
+    public void addToSearchHistory(OperationContext octxt, String searchString) throws ServiceException {
+        boolean success = false;
+        try {
+            beginTransaction("addToSearchHistory", octxt);
+            SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
+            if (searchHistory.contains(this, searchString)) {
+                int searchId = getNextSearchId(ID_AUTO_INCREMENT);
+                searchHistory.createNewEntry(this, searchId, searchString);
+            } else {
+                searchHistory.logSearch(this, searchString);
+            }
+            success = true;
+        } finally {
+            endTransaction(success);
+        }
+    }
+
+    public List<String> getSearchHistory(OperationContext octxt, SearchHistoryParams params) throws ServiceException {
+        boolean success = false;
+        try {
+            beginReadTransaction("getSearchHistory", octxt);
+            SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
+            List<String> searchStrings = searchHistory.getHistory(this, params);
+            success = true;
+            return searchStrings;
+        } finally {
+            endTransaction(success);
+        }
     }
 }
