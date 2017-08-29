@@ -10467,4 +10467,41 @@ public class Mailbox implements MailboxStore {
             endTransaction(success);
         }
     }
+
+    public void purgeSearchHistory(OperationContext octxt, long maxAgeMillis) throws ServiceException {
+        boolean success = false;
+        try {
+            beginTransaction("purgeSearchHistory", octxt);
+            SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
+            searchHistory.purgeHistory(this, maxAgeMillis);
+            success = true;
+        } finally {
+            endTransaction(success);
+        }
+    }
+
+    public void deleteSearchHistory(OperationContext octxt) throws ServiceException {
+        boolean success = false;
+        try {
+            beginTransaction("deleteSearchHistory", octxt);
+            SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
+            searchHistory.deleteHistory(this);
+            success = true;
+        } finally {
+            endTransaction(success);
+        }
+    }
+
+    public int getSearchHistoryCount(OperationContext octxt, String searchString) throws ServiceException {
+        boolean success = false;
+        try {
+            beginTransaction("searchHistoryCount", octxt);
+            SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
+            int count = searchHistory.getCount(this, searchString);
+            success = true;
+            return count;
+        } finally {
+            endTransaction(success);
+        }
+    }
 }
