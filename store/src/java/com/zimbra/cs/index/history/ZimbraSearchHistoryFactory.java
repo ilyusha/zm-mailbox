@@ -12,7 +12,6 @@ import com.zimbra.cs.mailbox.Mailbox;
 
 public class ZimbraSearchHistoryFactory implements SearchHistoryStore.Factory {
 
-    private Map<String, HistoryMetadataStore> mdCache = new HashMap<String, HistoryMetadataStore>();
     private Map<String, SavedSearchPromptLog> promptLogCache = new HashMap<String, SavedSearchPromptLog>();
 
     @Override
@@ -22,13 +21,7 @@ public class ZimbraSearchHistoryFactory implements SearchHistoryStore.Factory {
 
     @Override
     public HistoryMetadataStore getMetadataStore(Mailbox mbox) {
-        String key = mbox.getAccountId();
-        HistoryMetadataStore mdStore = mdCache.get(key);
-        if (mdStore == null) {
-            mdStore = new InMemorySearchHistoryMetadata();
-            mdCache.put(key, mdStore);
-        }
-        return mdStore;
+        return new DbSearchHistoryMetadata(mbox);
     }
 
     @Override

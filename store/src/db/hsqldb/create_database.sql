@@ -254,10 +254,11 @@ CREATE TABLE *{DATABASE_NAME}.data_source_item (
 -- Search History
 
 CREATE TABLE *{DATABASE_NAME}.searches (
-   mailbox_id     INTEGER NOT NULL,
-   id             INTEGER NOT NULL, -- ID of the query string
-   search         VARCHAR(255), -- the search query string
-   status         TINYINT, -- status of the saved search prompt: 1 = prompted; 2 = accepted; 3 = rejected
+   mailbox_id       INTEGER NOT NULL,
+   id               INTEGER NOT NULL, -- ID of the query string
+   search           VARCHAR(255), -- the search query string
+   status           TINYINT, -- status of the saved search prompt: 1 = prompted; 2 = accepted; 3 = rejected
+   last_search_date DATETIME, -- timestamp of the last time this was searched
 
    CONSTRAINT pk_search PRIMARY KEY (mailbox_id, id),
    CONSTRAINT fk_searches_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE
@@ -266,7 +267,7 @@ CREATE TABLE *{DATABASE_NAME}.searches (
 CREATE TABLE *{DATABASE_NAME}.search_history (
    mailbox_id    INTEGER NOT NULL,
    search_id     INTEGER NOT NULL,
-   date          INTEGER NOT NULL,
+   date          DATETIME NOT NULL,
 
    CONSTRAINT fk_search_log_mailbox_id FOREIGN KEY (mailbox_id) REFERENCES zimbra.mailbox(id) ON DELETE CASCADE,
    CONSTRAINT fk_search_id FOREIGN KEY (mailbox_id, search_id) REFERENCES searches(mailbox_id, id) ON DELETE CASCADE
