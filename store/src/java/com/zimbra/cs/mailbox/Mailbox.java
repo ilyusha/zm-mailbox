@@ -9826,7 +9826,7 @@ public class Mailbox implements MailboxStore {
                 mData.lastItemId = change.itemId;
             }
             if (change.searchId != MailboxChange.NO_CHANGE) {
-                mData.lastSearchId = change.itemId;
+                mData.lastSearchId = change.searchId;
             }
             if (change.contacts != MailboxChange.NO_CHANGE) {
                 mData.contacts = change.contacts;
@@ -10443,12 +10443,13 @@ public class Mailbox implements MailboxStore {
         try {
             beginTransaction("addToSearchHistory", octxt);
             SearchHistoryStore searchHistory = SearchHistoryStore.getInstance();
-            if (searchHistory.contains(this, searchString)) {
+            if (!searchHistory.contains(this, searchString)) {
                 int searchId = getNextSearchId(ID_AUTO_INCREMENT);
+                ZimbraLog.search.info("creating new search history entry '%s' with ID %d", searchString, searchId);
                 searchHistory.createNewEntry(this, searchId, searchString);
-            } else {
-                searchHistory.logSearch(this, searchString);
             }
+            ZimbraLog.search.info("adding '%s' to search history", searchString);
+            searchHistory.logSearch(this, searchString);
             success = true;
         } finally {
             endTransaction(success);
