@@ -868,6 +868,7 @@ public final class DbMailbox {
 
     public static final int CHANGE_CHECKPOINT_INCREMENT = Zimbra.isAlwaysOn() ? 1 : Math.max(1, LC.zimbra_mailbox_change_checkpoint_frequency.intValue());
     public static final int ITEM_CHECKPOINT_INCREMENT   = Zimbra.isAlwaysOn() ? 1 : 20;
+    public static final int SEARCH_ID_CHECKPOINT_INCREMENT = Zimbra.isAlwaysOn() ? 1 : 20;
 
     public static Mailbox.MailboxData getMailboxStats(DbConnection conn, int mailboxId) throws ServiceException {
         // no locking check because it's a mailbox-level op done before the Mailbox object is instantiated...
@@ -922,9 +923,10 @@ public final class DbMailbox {
             mbd.itemcacheCheckpoint = rs.getInt(pos++);
             mbd.lastSearchId = rs.getInt(pos++);
 
-            // round lastItemId and lastChangeId up so that they get written on the next change
+            // round lastItemId, lastChangeId, and lastSearchId up so that they get written on the next change
             mbd.lastItemId += ITEM_CHECKPOINT_INCREMENT - 1;
             mbd.lastChangeId += CHANGE_CHECKPOINT_INCREMENT - 1;
+            mbd.lastSearchId += SEARCH_ID_CHECKPOINT_INCREMENT - 1;
             int rounding = mbd.lastItemId % ITEM_CHECKPOINT_INCREMENT;
             if (rounding != ITEM_CHECKPOINT_INCREMENT - 1) {
                 mbd.lastItemId -= rounding + 1;
@@ -932,6 +934,10 @@ public final class DbMailbox {
             rounding = mbd.lastChangeId % CHANGE_CHECKPOINT_INCREMENT;
             if (rounding != CHANGE_CHECKPOINT_INCREMENT - 1) {
                 mbd.lastChangeId -= rounding + 1;
+            }
+            rounding = mbd.lastSearchId % SEARCH_ID_CHECKPOINT_INCREMENT;
+            if (rounding != SEARCH_ID_CHECKPOINT_INCREMENT - 1) {
+                mbd.lastSearchId -= rounding + 1;
             }
 
             rs.close();
