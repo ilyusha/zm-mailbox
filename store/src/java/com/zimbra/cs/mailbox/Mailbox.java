@@ -485,6 +485,9 @@ public class Mailbox implements MailboxStore {
             if (changeId != NO_CHANGE && changeId / DbMailbox.CHANGE_CHECKPOINT_INCREMENT > data.lastChangeId / DbMailbox.CHANGE_CHECKPOINT_INCREMENT) {
                 return true;
             }
+            if (searchId != NO_CHANGE && searchId / DbMailbox.SEARCH_ID_CHECKPOINT_INCREMENT > data.lastSearchId / DbMailbox.SEARCH_ID_CHECKPOINT_INCREMENT) {
+                return true;
+            }
             return false;
         }
 
