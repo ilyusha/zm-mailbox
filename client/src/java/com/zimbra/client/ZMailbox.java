@@ -185,6 +185,8 @@ import com.zimbra.soap.mail.message.GetModifiedItemsIDsRequest;
 import com.zimbra.soap.mail.message.GetModifiedItemsIDsResponse;
 import com.zimbra.soap.mail.message.GetOutgoingFilterRulesRequest;
 import com.zimbra.soap.mail.message.GetOutgoingFilterRulesResponse;
+import com.zimbra.soap.mail.message.GetRelatedContactsRequest;
+import com.zimbra.soap.mail.message.GetRelatedContactsResponse;
 import com.zimbra.soap.mail.message.GetSearchHistoryRequest;
 import com.zimbra.soap.mail.message.GetSearchHistoryResponse;
 import com.zimbra.soap.mail.message.IMAPCopyRequest;
@@ -6528,7 +6530,16 @@ public class ZMailbox implements ToZJSONObject, MailboxStore {
         return resp.getSearches();
     }
 
-
+    public List<String> getRelatedContacts(List<String> contacts, String edgeType, Integer limit) throws ServiceException {
+        GetRelatedContactsRequest req = new GetRelatedContactsRequest();
+        req.setContacts(contacts);
+        if (limit != null) {
+            req.setLimit(limit);
+        }
+        req.setType(edgeType);
+        GetRelatedContactsResponse resp = invokeJaxb(req);
+        return resp.getRelatedContacts();
+    }
 
     public static class OpenIMAPFolderParams {
 
