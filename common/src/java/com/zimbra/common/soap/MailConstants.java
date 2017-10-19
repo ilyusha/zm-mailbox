@@ -1375,4 +1375,12 @@ public final class MailConstants {
     public static final String A_CONTACTS_BACKUP_FILE_NAME = "contactsBackupFileName";
     public static final String A_CONTACTS_RESTORE_RESOLVE = "resolve";
     public static final String A_CONTACTS_BACKUP_FOLDER_NAME = "ContactsBackup";
+
+    //Related Contacts
+    public static final String E_GET_RELATED_CONTACTS_REQUEST = "GetRelatedContactsRequest";
+    public static final String E_GET_RELATED_CONTACTS_RESPONSE = "GetRelatedContactsResponse";
+    public static final QName GET_RELATED_CONTACTS_REQUEST = QName.get(E_GET_RELATED_CONTACTS_REQUEST, NAMESPACE);
+    public static final QName GET_RELATED_CONTACTS_RESPONSE = QName.get(E_GET_RELATED_CONTACTS_RESPONSE, NAMESPACE);
+    public static final String E_RELATED_CONTACTS = "relatedContacts";
+    public static final String A_CONTACT_AFFINITY_TYPE = "type";
 }
