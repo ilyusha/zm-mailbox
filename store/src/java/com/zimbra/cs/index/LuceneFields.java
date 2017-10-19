@@ -224,7 +224,6 @@ public final class LuceneFields {
      */
     public static final String L_DATASOURCE_ID = "datasource_id";
 
-
     public static String valueForBooleanField(boolean value) {
         return value ? "1" : "0";
     }
