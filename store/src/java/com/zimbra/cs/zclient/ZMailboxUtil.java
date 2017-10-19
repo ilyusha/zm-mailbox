@@ -35,6 +35,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.ServerError;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,6 +63,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 
+import com.google.common.base.Splitter;
 import com.zimbra.client.ZAce;
 import com.zimbra.client.ZAppointmentHit;
 import com.zimbra.client.ZAutoCompleteMatch;
@@ -431,6 +433,7 @@ public class ZMailboxUtil implements DebugListener {
         GET_FOLDER_GRANT("getFolderGrant", "gfg", "{folder-path}", "get folder grants", Category.FOLDER, 1, 1, O_VERBOSE),
         GET_MESSAGE("getMessage", "gm", "{msg-id}", "get a message", Category.MESSAGE, 1, 1, O_VERBOSE),
         GET_MAILBOX_SIZE("getMailboxSize", "gms", "", "get mailbox size", Category.MISC, 0, 0, O_VERBOSE),
+        GET_RELATED_CONTACTS("getRelatedContacts", "grc", "{contacts} {affinityType} [numResults]", "get related contacts", Category.CONTACT, 2, 3, O_VERBOSE),
         GET_RIGHTS("getRights", "gr", "[right1 [right2...]]", "get rights currently granted", Category.RIGHT, 0, Integer.MAX_VALUE, O_VERBOSE),
         GET_REST_URL("getRestURL", "gru", "{relative-path}", "do a GET on a REST URL relative to the mailbox", Category.MISC, 1, 1,
                 O_OUTPUT_FILE, O_START_TIME, O_END_TIME, O_URL),
@@ -1224,6 +1227,9 @@ public class ZMailboxUtil implements DebugListener {
             break;
         case GET_RIGHTS:
             doGetRights(args);
+            break;
+        case GET_RELATED_CONTACTS:
+            doGetRelatedContacts(args);
             break;
         case GET_REST_URL:
             doGetRestURL(args);
@@ -2230,7 +2236,7 @@ public class ZMailboxUtil implements DebugListener {
             dumpSearches(mMbox.getSearchHistory(), "Search History");
         } else {
             int limit = Integer.parseInt(args[0]);
-            dumpSearches(mMbox.getSearchHistory(limit), "SearchHistory");
+            dumpSearches(mMbox.getSearchHistory(limit), "Search History");
         }
     }
 
@@ -2245,6 +2251,15 @@ public class ZMailboxUtil implements DebugListener {
         for (String s: searches) {
             stdout.println(s);
         }
+    }
+
+    private void doGetRelatedContacts(String[] args) throws ServiceException {
+        List<String> contacts = new ArrayList<String>();
+        for(String contact: Splitter.on(",").trimResults().split(args[0])) {
+            contacts.add(contact);
+        }
+        Integer limit = args.length == 2 ? null : Integer.valueOf(args[2]);
+        dumpSearches(mMbox.getRelatedContacts(contacts, args[1], limit), "Related Contacts");
     }
 
     private void doSearchConvRedisplay() {
