@@ -641,6 +641,366 @@ public abstract class ZAttrAlwaysOnCluster extends NamedEntry {
     }
 
     /**
+     * URL of the contact affinity backend
+     *
+     * @return zimbraContactAffinityBackendURL, or null if unset
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3047)
+    public String getContactAffinityBackendURL() {
+        return getAttr(Provisioning.A_zimbraContactAffinityBackendURL, null, true);
+    }
+
+    /**
+     * URL of the contact affinity backend
+     *
+     * @param zimbraContactAffinityBackendURL new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3047)
+    public void setContactAffinityBackendURL(String zimbraContactAffinityBackendURL) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityBackendURL, zimbraContactAffinityBackendURL);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * URL of the contact affinity backend
+     *
+     * @param zimbraContactAffinityBackendURL new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3047)
+    public Map<String,Object> setContactAffinityBackendURL(String zimbraContactAffinityBackendURL, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityBackendURL, zimbraContactAffinityBackendURL);
+        return attrs;
+    }
+
+    /**
+     * URL of the contact affinity backend
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3047)
+    public void unsetContactAffinityBackendURL() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityBackendURL, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * URL of the contact affinity backend
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3047)
+    public Map<String,Object> unsetContactAffinityBackendURL(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityBackendURL, "");
+        return attrs;
+    }
+
+    /**
+     * Whether event logging is enabled on the server
+     *
+     * @return zimbraContactAffinityEnabled, or false if unset
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3046)
+    public boolean isContactAffinityEnabled() {
+        return getBooleanAttr(Provisioning.A_zimbraContactAffinityEnabled, false, true);
+    }
+
+    /**
+     * Whether event logging is enabled on the server
+     *
+     * @param zimbraContactAffinityEnabled new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3046)
+    public void setContactAffinityEnabled(boolean zimbraContactAffinityEnabled) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityEnabled, zimbraContactAffinityEnabled ? TRUE : FALSE);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Whether event logging is enabled on the server
+     *
+     * @param zimbraContactAffinityEnabled new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3046)
+    public Map<String,Object> setContactAffinityEnabled(boolean zimbraContactAffinityEnabled, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityEnabled, zimbraContactAffinityEnabled ? TRUE : FALSE);
+        return attrs;
+    }
+
+    /**
+     * Whether event logging is enabled on the server
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3046)
+    public void unsetContactAffinityEnabled() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityEnabled, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Whether event logging is enabled on the server
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3046)
+    public Map<String,Object> unsetContactAffinityEnabled(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityEnabled, "");
+        return attrs;
+    }
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * <p>Valid values: [combined, account]
+     *
+     * @return zimbraContactAffinityIndexType, or null if unset and/or has invalid value
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public ZAttrProvisioning.ContactAffinityIndexType getContactAffinityIndexType() {
+        try { String v = getAttr(Provisioning.A_zimbraContactAffinityIndexType, true, true); return v == null ? null : ZAttrProvisioning.ContactAffinityIndexType.fromString(v); } catch(com.zimbra.common.service.ServiceException e) { return null; }
+    }
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * <p>Valid values: [combined, account]
+     *
+     * @return zimbraContactAffinityIndexType, or null if unset
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public String getContactAffinityIndexTypeAsString() {
+        return getAttr(Provisioning.A_zimbraContactAffinityIndexType, null, true);
+    }
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * <p>Valid values: [combined, account]
+     *
+     * @param zimbraContactAffinityIndexType new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public void setContactAffinityIndexType(ZAttrProvisioning.ContactAffinityIndexType zimbraContactAffinityIndexType) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityIndexType, zimbraContactAffinityIndexType.toString());
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * <p>Valid values: [combined, account]
+     *
+     * @param zimbraContactAffinityIndexType new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public Map<String,Object> setContactAffinityIndexType(ZAttrProvisioning.ContactAffinityIndexType zimbraContactAffinityIndexType, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityIndexType, zimbraContactAffinityIndexType.toString());
+        return attrs;
+    }
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * <p>Valid values: [combined, account]
+     *
+     * @param zimbraContactAffinityIndexType new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public void setContactAffinityIndexTypeAsString(String zimbraContactAffinityIndexType) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityIndexType, zimbraContactAffinityIndexType);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * <p>Valid values: [combined, account]
+     *
+     * @param zimbraContactAffinityIndexType new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public Map<String,Object> setContactAffinityIndexTypeAsString(String zimbraContactAffinityIndexType, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityIndexType, zimbraContactAffinityIndexType);
+        return attrs;
+    }
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * <p>Valid values: [combined, account]
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public void unsetContactAffinityIndexType() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityIndexType, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * <p>Valid values: [combined, account]
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public Map<String,Object> unsetContactAffinityIndexType(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityIndexType, "");
+        return attrs;
+    }
+
+    /**
+     * Maximum contact group size that will result in contact affinity being
+     * updated for that group
+     *
+     * @return zimbraContactAffinityMaxCliqueSize, or -1 if unset
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3049)
+    public int getContactAffinityMaxCliqueSize() {
+        return getIntAttr(Provisioning.A_zimbraContactAffinityMaxCliqueSize, -1, true);
+    }
+
+    /**
+     * Maximum contact group size that will result in contact affinity being
+     * updated for that group
+     *
+     * @param zimbraContactAffinityMaxCliqueSize new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3049)
+    public void setContactAffinityMaxCliqueSize(int zimbraContactAffinityMaxCliqueSize) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityMaxCliqueSize, Integer.toString(zimbraContactAffinityMaxCliqueSize));
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Maximum contact group size that will result in contact affinity being
+     * updated for that group
+     *
+     * @param zimbraContactAffinityMaxCliqueSize new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3049)
+    public Map<String,Object> setContactAffinityMaxCliqueSize(int zimbraContactAffinityMaxCliqueSize, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityMaxCliqueSize, Integer.toString(zimbraContactAffinityMaxCliqueSize));
+        return attrs;
+    }
+
+    /**
+     * Maximum contact group size that will result in contact affinity being
+     * updated for that group
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3049)
+    public void unsetContactAffinityMaxCliqueSize() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityMaxCliqueSize, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Maximum contact group size that will result in contact affinity being
+     * updated for that group
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3049)
+    public Map<String,Object> unsetContactAffinityMaxCliqueSize(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraContactAffinityMaxCliqueSize, "");
+        return attrs;
+    }
+
+    /**
      * Timeout in milliseconds before retrying failed convert URLs.
      *
      * @return zimbraConvertPoolTimeout, or -1 if unset
@@ -1268,7 +1628,7 @@ public abstract class ZAttrAlwaysOnCluster extends NamedEntry {
     }
 
     /**
-     * Whether event logging is enabled
+     * Whether event logging is enabled on the server
      *
      * @return zimbraEventLoggingEnabled, or false if unset
      *
@@ -1280,7 +1640,7 @@ public abstract class ZAttrAlwaysOnCluster extends NamedEntry {
     }
 
     /**
-     * Whether event logging is enabled
+     * Whether event logging is enabled on the server
      *
      * @param zimbraEventLoggingEnabled new value
      * @throws com.zimbra.common.service.ServiceException if error during update
@@ -1295,7 +1655,7 @@ public abstract class ZAttrAlwaysOnCluster extends NamedEntry {
     }
 
     /**
-     * Whether event logging is enabled
+     * Whether event logging is enabled on the server
      *
      * @param zimbraEventLoggingEnabled new value
      * @param attrs existing map to populate, or null to create a new map
@@ -1311,7 +1671,7 @@ public abstract class ZAttrAlwaysOnCluster extends NamedEntry {
     }
 
     /**
-     * Whether event logging is enabled
+     * Whether event logging is enabled on the server
      *
      * @throws com.zimbra.common.service.ServiceException if error during update
      *
@@ -1325,7 +1685,7 @@ public abstract class ZAttrAlwaysOnCluster extends NamedEntry {
     }
 
     /**
-     * Whether event logging is enabled
+     * Whether event logging is enabled on the server
      *
      * @param attrs existing map to populate, or null to create a new map
      * @return populated map to pass into Provisioning.modifyAttrs

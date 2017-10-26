@@ -242,6 +242,22 @@ public class ZAttrProvisioning {
         public boolean isVeritas() { return this == Veritas;}
     }
 
+    public static enum ContactAffinityIndexType {
+        combined("combined"),
+        account("account");
+        private String mValue;
+        private ContactAffinityIndexType(String value) { mValue = value; }
+        public String toString() { return mValue; }
+        public static ContactAffinityIndexType fromString(String s) throws ServiceException {
+            for (ContactAffinityIndexType value : values()) {
+                if (value.mValue.equals(s)) return value;
+             }
+             throw ServiceException.INVALID_REQUEST("invalid value: "+s+", valid values: "+ Arrays.asList(values()), null);
+        }
+        public boolean isCombined() { return this == combined;}
+        public boolean isAccount() { return this == account;}
+    }
+
     public static enum DataSourceAuthMechanism {
         PLAIN("PLAIN"),
         GSSAPI("GSSAPI"),
@@ -4736,6 +4752,40 @@ public class ZAttrProvisioning {
     public static final String A_zimbraConstraint = "zimbraConstraint";
 
     /**
+     * URL of the contact affinity backend
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3047)
+    public static final String A_zimbraContactAffinityBackendURL = "zimbraContactAffinityBackendURL";
+
+    /**
+     * Whether event logging is enabled on the server
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3046)
+    public static final String A_zimbraContactAffinityEnabled = "zimbraContactAffinityEnabled";
+
+    /**
+     * Specifies whether the contact affinity graph is stored in a single
+     * joint index or in account-level indexes
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3048)
+    public static final String A_zimbraContactAffinityIndexType = "zimbraContactAffinityIndexType";
+
+    /**
+     * Maximum contact group size that will result in contact affinity being
+     * updated for that group
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3049)
+    public static final String A_zimbraContactAffinityMaxCliqueSize = "zimbraContactAffinityMaxCliqueSize";
+
+    /**
      * Deprecated since: 6.0.7. deprecated in favor of
      * zimbraContactEmailFields, for bug 45475. Orig desc: Comma separates
      * list of attributes in contact object to search for email addresses
@@ -5940,7 +5990,7 @@ public class ZAttrProvisioning {
     public static final String A_zimbraEventLoggingBackends = "zimbraEventLoggingBackends";
 
     /**
-     * Whether event logging is enabled
+     * Whether event logging is enabled on the server
      *
      * @since ZCS 8.8.6
      */
