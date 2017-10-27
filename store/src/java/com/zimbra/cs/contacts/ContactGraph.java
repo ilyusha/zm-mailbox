@@ -131,7 +131,7 @@ public abstract class ContactGraph {
         return new ParsedAddress(address.toString()).emailPart;
     }
 
-    private List<ContactNode> emailsToNodes(List<String> emails, String dsId) {
+    private static List<ContactNode> emailsToNodes(Collection<String> emails, String dsId) {
         return emails.stream().map(email -> new ContactNode(email, dsId)).collect(Collectors.toList());
     }
 
@@ -341,11 +341,12 @@ public abstract class ContactGraph {
         private Long updateCutoff = null;
         private int numResults = 0;
         private int lowerBound = 1;
-        private List<String> inputContacts;
+        private String dataSourceId;
+        private List<ContactNode> inputContacts;
 
         public ContactsParams(Collection<String> contacts) {
-            inputContacts = new ArrayList<String>();
-            inputContacts.addAll(contacts);
+            inputContacts = new ArrayList<>();
+            inputContacts.addAll(emailsToNodes(contacts, null));
         }
 
         public ContactsParams(String... contacts) {
@@ -376,7 +377,15 @@ public abstract class ContactGraph {
             return lowerBound;
         }
 
-        public Collection<String> getInputContacts() {
+        public boolean hasDataSourceId() {
+            return dataSourceId != null;
+        }
+
+        public String getDataSourceId() {
+            return dataSourceId;
+        }
+
+        public Collection<ContactNode> getInputContacts() {
             return inputContacts;
         }
 
