@@ -110,6 +110,7 @@ import com.zimbra.cs.account.Domain;
 import com.zimbra.cs.account.Provisioning;
 import com.zimbra.cs.account.Server;
 import com.zimbra.cs.account.ShareLocator;
+import com.zimbra.cs.contacts.ContactGraph;
 import com.zimbra.cs.datasource.DataSourceManager;
 import com.zimbra.cs.db.DbDataSource;
 import com.zimbra.cs.db.DbMailItem;
@@ -10653,9 +10654,10 @@ public class Mailbox implements MailboxStore {
     }
 
     public static class MessageCallbackContext {
+        private MessageCallback.Type type;
         private String dsId;
         private String recipient;
-        private MessageCallback.Type type;
+        private Long timestamp;
 
         public MessageCallbackContext(MessageCallback.Type type) {
             this.type = type;
@@ -10673,12 +10675,20 @@ public class Mailbox implements MailboxStore {
             return recipient;
         }
 
+        public Long getTimestamp() {
+            return timestamp;
+        }
+
         public void setDataSourceId(String dsId) {
             this.dsId = dsId;
         }
 
         public void setRecipient(String recipient) {
             this.recipient = recipient;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
         }
     }
 
@@ -10693,31 +10703,67 @@ public class Mailbox implements MailboxStore {
 
     public class SentMessageCallback implements MessageCallback {
 
-        @Override
-        public void execute(int msgId, ParsedMessage pm, MessageCallbackContext ctxt) {
+        private void updateSentEvents(int msgId, ParsedMessage pm, String dsId) {
             MimeMessage mm = pm.getMimeMessage();
             try {
-                String dsId = ctxt.getDataSourceId();
                 List<Event> sentEvents = Event.generateSentEvents(getAccountId(), msgId, mm.getFrom()[0], mm.getAllRecipients(), dsId);
                 EventLogger.getEventLogger().log(sentEvents);
             } catch (MessagingException e) {
                 ZimbraLog.soap.warn(String.format("Couldn't log SENT event for message %s", msgId), e);
             }
         }
+
+        private void updateContactAffinity(ParsedMessage pm, long timestamp, String dsId) {
+            try {
+                if (Provisioning.getInstance().getLocalServer().isContactAffinityEnabled()) {
+                    ContactGraph contactGraph = ContactGraph.getFactory().getContactGraph(getAccountId());
+                    contactGraph.updateFromSentMimeMessage(pm.getMimeMessage(), timestamp, dsId);
+                }
+            } catch (ServiceException e) {
+                ZimbraLog.event.warn("unable to update contact affinity", e);
+            }
+
+        }
+
+        @Override
+        public void execute(int msgId, ParsedMessage pm, MessageCallbackContext ctxt) {
+            String dsId = ctxt.getDataSourceId();
+            long timestamp = ctxt.getTimestamp() == null ? System.currentTimeMillis() : ctxt.getTimestamp();
+            updateSentEvents(msgId, pm, dsId);
+            updateContactAffinity(pm, timestamp, dsId);
+        }
     }
 
     public class ReceivedMessageCallback implements MessageCallback {
 
-        @Override
-        public void execute(int msgId, ParsedMessage pm, MessageCallbackContext ctxt) {
+        private void updateReceivedEvents(int msgId, ParsedMessage pm, String recipient, String dsId) {
             String sender = pm.getSender();
-            String recipient = ctxt.getRecipient();
             if (Strings.isNullOrEmpty(recipient)) {
                 ZimbraLog.event.warn("no recipient specified for message %d", msgId);
             } else {
                 String dsId = ctxt.getDataSourceId();
                 EventLogger.getEventLogger().log(Event.generateReceivedEvent(getAccountId(), msgId, sender, recipient, dsId));
             }
+        }
+
+        private void updateContactAffinity(ParsedMessage pm, long timestamp, String dsId) {
+            try {
+                if (Provisioning.getInstance().getLocalServer().isContactAffinityEnabled()) {
+                    ContactGraph contactGraph = ContactGraph.getFactory().getContactGraph(getAccountId());
+                    contactGraph.updateFromReceivedMimeMessage(pm.getMimeMessage(), timestamp, getAccount(), dsId);
+                }
+            } catch (ServiceException e) {
+                ZimbraLog.event.warn("unable to get recipient account to update contact affinity", e);
+            }
+        }
+
+        @Override
+        public void execute(int msgId, ParsedMessage pm, MessageCallbackContext ctxt) {
+            long timestamp = ctxt.getTimestamp() == null ? System.currentTimeMillis() : ctxt.getTimestamp();
+            String dsId = ctxt.getDataSourceId();
+            String recipient = ctxt.getRecipient();
+            updateReceivedEvents(msgId, pm, recipient, dsId);
+            updateContactAffinity(pm, timestamp, dsId);
         }
     }
 }
