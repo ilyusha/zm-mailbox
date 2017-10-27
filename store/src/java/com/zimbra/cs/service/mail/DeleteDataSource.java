@@ -23,9 +23,11 @@ import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.soap.Element;
 import com.zimbra.common.soap.MailConstants;
 import com.zimbra.common.soap.SoapFaultException;
+import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Account;
 import com.zimbra.cs.account.DataSource;
 import com.zimbra.cs.account.Provisioning;
+import com.zimbra.cs.contacts.ContactGraph;
 import com.zimbra.cs.datasource.DataSourceListner;
 import com.zimbra.cs.datasource.DataSourceManager;
 import com.zimbra.cs.db.DbDataSource;
@@ -78,7 +80,16 @@ public class DeleteDataSource extends MailDocumentHandler {
             }
             DbDataSource.deleteAllMappings(dsrc);
             DataSourceManager.cancelSchedule(account, dataSourceId);
-            EventStore.getFactory().getEventStore(account.getId()).deleteEvents(dataSourceId);
+            try {
+                EventStore.getFactory().getEventStore(account.getId()).deleteEvents(dataSourceId);
+            } catch (ServiceException e) {
+                ZimbraLog.datasource.error("unable to delete event data for datasource %s", dataSourceId);
+            }
+            try {
+                ContactGraph.getFactory().getContactGraph(account.getId()).deleteDataSource(dataSourceId);
+            } catch (ServiceException e) {
+                ZimbraLog.datasource.error("unable to delete contact affinity data for datasource %s", dataSourceId);
+            }
         }
         Element response = zsc.createElement(MailConstants.DELETE_DATA_SOURCE_RESPONSE);
         return response;

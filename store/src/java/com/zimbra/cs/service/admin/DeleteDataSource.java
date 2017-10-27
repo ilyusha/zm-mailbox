@@ -24,12 +24,14 @@ import com.zimbra.common.soap.AccountConstants;
 import com.zimbra.common.soap.AdminConstants;
 import com.zimbra.common.soap.Element;
 import com.zimbra.common.soap.SoapFaultException;
+import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Account;
 import com.zimbra.cs.account.AccountServiceException;
 import com.zimbra.cs.account.Provisioning;
 import com.zimbra.common.account.Key.AccountBy;
 import com.zimbra.cs.account.accesscontrol.AdminRight;
 import com.zimbra.cs.account.accesscontrol.Rights.Admin;
+import com.zimbra.cs.contacts.ContactGraph;
 import com.zimbra.cs.datasource.DataSourceManager;
 import com.zimbra.cs.event.logger.EventStore;
 import com.zimbra.soap.ZimbraSoapContext;
@@ -67,7 +69,16 @@ public class DeleteDataSource extends AdminDocumentHandler {
         Provisioning.getInstance().deleteDataSource(account, dsId);
 
         DataSourceManager.cancelSchedule(account, dsId);
-        EventStore.getFactory().getEventStore(account.getId()).deleteEvents(dsId);
+        try {
+            EventStore.getFactory().getEventStore(account.getId()).deleteEvents(dsId);
+        } catch (ServiceException e) {
+            ZimbraLog.datasource.error("unable to delete event data for datasource %s", dsId);
+        }
+        try {
+            ContactGraph.getFactory().getContactGraph(account.getId()).deleteDataSource(dsId);
+        } catch (ServiceException e) {
+            ZimbraLog.datasource.error("unable to delete contact affinity data for datasource %s", dsId);
+        }
         Element response = zsc.createElement(AdminConstants.DELETE_DATA_SOURCE_RESPONSE);
         return response;
     }
