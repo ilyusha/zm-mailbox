@@ -86,10 +86,10 @@ public class SolrContactGraph extends ContactGraph {
         return new TermQuery(new Term(FLD_ACCT_ID, accountId)).toString();
     }
 
-    TupleStream getInitialSearchStream(String zkHost, String collection, Collection<String> contacts) throws IOException {
+    TupleStream getInitialSearchStream(String zkHost, String collection, Collection<ContactNode> contacts) throws IOException {
         BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
-        for (String contact: contacts) {
-            queryBuilder.add(new TermQuery(new Term(FLD_FROM, contact)), Occur.SHOULD);
+        for (ContactNode contact: contacts) {
+            queryBuilder.add(getTermQuery(contact, FLD_FROM), Occur.SHOULD);
         }
         Query query = queryBuilder.build();
 
@@ -143,7 +143,8 @@ public class SolrContactGraph extends ContactGraph {
         return new RankStream(stream, numResults, comparator);
     }
 
-    TupleStream getStreamingQuery(String zkHost, String collection, String edgeField, String edgeUpdateField, int lowerBound, Long updateCutoff, int numResults, Collection<String> contacts) throws IOException {
+    TupleStream getStreamingQuery(String zkHost, String collection, String edgeField, String edgeUpdateField, int lowerBound,
+            Long updateCutoff, int numResults, Collection<ContactNode> contacts) throws IOException {
 
         /*
          * First we search for all starting nodes in the contact graph
@@ -164,14 +165,11 @@ public class SolrContactGraph extends ContactGraph {
 
     @Override
     public List<ContactResult> getRelatedContacts(ContactsParams params) throws ServiceException {
-        Collection<String> contacts = params.getInputContacts();
+        Collection<ContactNode> contacts = params.getInputContacts();
         EdgeType type = params.getEdgeType();
         int numResults = params.getNumResults();
         int lowerBound = params.getLowerBound();
-        Long cutoff = null;
-        if (params.hasUpdateCutoff()) {
-            cutoff = params.getUpdateCutoff();
-        }
+        Long cutoff = params.hasUpdateCutoff() ? params.getUpdateCutoff() : null;
 
         List<ContactResult> results = new ArrayList<>();
 
