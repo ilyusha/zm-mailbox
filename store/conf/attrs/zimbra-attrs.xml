@@ -9763,11 +9763,11 @@ TODO: delete them permanently from here
   <defaultCOSValue>TRUE</defaultCOSValue>
 </attr>
 
-<attr id="3047" name="zimbraContactAffinityBackendURL" type="string" cardinality="single" optionalIn="globalConfig,server,alwaysOnCluster" flags="serverInherited,serverPreferAlwaysOn" since="8.8.6">
+<attr id="3047" name="zimbraContactAffinityBackendURL" type="string" cardinality="single" optionalIn="globalConfig,server,alwaysOnCluster" flags="serverInherited,serverPreferAlwaysOn" callback="ContactAffinityCallback" since="8.8.6">
   <desc>URL of the contact affinity backend</desc>
 </attr>
 
-<attr id="3048" name="zimbraContactAffinityIndexType" type="enum" value="combined,account" cardinality="single" optionalIn="globalConfig,server,alwaysOnCluster" flags="serverInherited,serverPreferAlwaysOn" since="8.8.6">
+<attr id="3048" name="zimbraContactAffinityIndexType" type="enum" value="combined,account" cardinality="single" optionalIn="globalConfig,server,alwaysOnCluster" flags="serverInherited,serverPreferAlwaysOn" callback="ContactAffinityCallback" since="8.8.6">
   <globalConfigValue>account</globalConfigValue>
   <desc>Specifies whether the contact affinity graph is stored in a single joint index or in account-level indexes</desc>
 </attr>
@@ -9776,5 +9776,4 @@ TODO: delete them permanently from here
   <globalConfigValue>10</globalConfigValue>
   <desc>Maximum contact group size that will result in contact affinity being updated for that group</desc>
 </attr>
-
 </attrs>
