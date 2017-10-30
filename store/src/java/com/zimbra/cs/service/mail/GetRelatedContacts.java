@@ -26,9 +26,9 @@ public class GetRelatedContacts extends MailDocumentHandler {
         ZimbraSoapContext zsc = getZimbraSoapContext(context);
         Account acct = getRequestedAccount(zsc);
         GetRelatedContactsRequest req = zsc.elementToJaxb(request);
-        ContactsParams params = new ContactsParams(req.getContacts());
+        ContactsParams params = new ContactsParams(req.getContacts(), req.getDataSourceId());
         String typeStr = req.getType();
-        if (typeStr == null) {
+        if (typeStr == null || typeStr.equalsIgnoreCase("all")) {
             params.setAllEdges();
         } else {
             EdgeType type = EdgeType.getKnownEdgeType(typeStr);
@@ -38,7 +38,6 @@ public class GetRelatedContacts extends MailDocumentHandler {
             }
         }
         params.setNumResults(parseLimit(req.getLimit()));
-        params.setLowerBound(1); //for now
         ContactGraph graph = ContactGraph.getFactory().getContactGraph(acct.getId());
         GetRelatedContactsResponse resp = new GetRelatedContactsResponse();
         List<ContactResult> results = graph.getRelatedContacts(params);

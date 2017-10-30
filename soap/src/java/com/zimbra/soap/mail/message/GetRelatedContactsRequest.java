@@ -25,6 +25,11 @@ public class GetRelatedContactsRequest {
     @XmlAttribute(name=MailConstants.A_CONTACT_AFFINITY_TYPE, required=false)
     private String type;
 
+    /**
+     * @zm-api-field-description Optional data source ID to filter recommendations on
+     */
+    @XmlAttribute(name=MailConstants.A_DATASOURCE_ID, required=false)
+    private String dsId;
 
     @XmlElements({
         @XmlElement(name=MailConstants.E_CONTACT, type=String.class, required=true),
@@ -45,4 +50,7 @@ public class GetRelatedContactsRequest {
 
     public Integer getLimit() { return limit; }
     public void setLimit(int limit) { this.limit = limit; }
+
+    public String getDataSourceId() { return dsId; }
+    public void setDataSourceId(String dsId) { this.dsId = dsId; }
 }

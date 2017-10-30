@@ -345,8 +345,12 @@ public abstract class ContactGraph {
         private List<ContactNode> inputContacts;
 
         public ContactsParams(Collection<String> contacts) {
+            this(contacts, null);
+        }
+
+        public ContactsParams(Collection<String> contacts, String dataSourceId) {
             inputContacts = new ArrayList<>();
-            inputContacts.addAll(emailsToNodes(contacts, null));
+            inputContacts.addAll(emailsToNodes(contacts, dataSourceId));
         }
 
         public ContactsParams(String... contacts) {

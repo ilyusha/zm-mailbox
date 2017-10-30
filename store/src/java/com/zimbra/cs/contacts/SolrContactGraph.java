@@ -117,6 +117,15 @@ public class SolrContactGraph extends ContactGraph {
         builder.add(rangeQuery, Occur.MUST);
     }
 
+    private String parseNodeName(String nodeName) {
+        String[] parts = nodeName.split(":", 2);
+        if (parts.length == 1 || parts[0].length() == 0) {
+            return nodeName;
+        } else {
+            return parts[1];
+        }
+    }
+
     TupleStream getNodesStream(String zkHost, String collection, TupleStream stream, String edgeField, String edgeUpdateField, int lowerBound, Long updateCutoff) throws IOException {
 
         BooleanQuery.Builder builder = newBooleanQueryBuilder();
@@ -190,9 +199,9 @@ public class SolrContactGraph extends ContactGraph {
                 if (tuple.EOF) {
                     return results;
                 }
-                String name = tuple.getString(FLD_NODE);
+                String contact = parseNodeName(tuple.getString(FLD_NODE));
                 double weight = tuple.getDouble(weightField);
-                results.add(new ContactResult(name, weight));
+                results.add(new ContactResult(contact, weight));
             }
         } catch (IOException e) {
             throw ServiceException.FAILURE("unable to generate streaming query", e);

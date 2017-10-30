@@ -6531,12 +6531,21 @@ public class ZMailbox implements ToZJSONObject, MailboxStore {
     }
 
     public List<String> getRelatedContacts(List<String> contacts, String edgeType, Integer limit) throws ServiceException {
+        return getRelatedContacts(contacts, edgeType, limit, null);
+    }
+
+    public List<String> getRelatedContacts(List<String> contacts, String edgeType, Integer limit, String dsId) throws ServiceException {
         GetRelatedContactsRequest req = new GetRelatedContactsRequest();
         req.setContacts(contacts);
         if (limit != null) {
             req.setLimit(limit);
         }
-        req.setType(edgeType);
+        if (edgeType != null) {
+            req.setType(edgeType);
+        }
+        if (dsId != null) {
+            req.setDataSourceId(dsId);
+        }
         GetRelatedContactsResponse resp = invokeJaxb(req);
         return resp.getRelatedContacts();
     }

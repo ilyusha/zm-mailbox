@@ -433,7 +433,7 @@ public class ZMailboxUtil implements DebugListener {
         GET_FOLDER_GRANT("getFolderGrant", "gfg", "{folder-path}", "get folder grants", Category.FOLDER, 1, 1, O_VERBOSE),
         GET_MESSAGE("getMessage", "gm", "{msg-id}", "get a message", Category.MESSAGE, 1, 1, O_VERBOSE),
         GET_MAILBOX_SIZE("getMailboxSize", "gms", "", "get mailbox size", Category.MISC, 0, 0, O_VERBOSE),
-        GET_RELATED_CONTACTS("getRelatedContacts", "grc", "{contacts} {affinityType} [numResults]", "get related contacts", Category.CONTACT, 2, 3, O_VERBOSE),
+        GET_RELATED_CONTACTS("getRelatedContacts", "grc", "{contacts} [affinityType] [data-source-id]", "get related contacts", Category.CONTACT, 1, 3, O_VERBOSE),
         GET_RIGHTS("getRights", "gr", "[right1 [right2...]]", "get rights currently granted", Category.RIGHT, 0, Integer.MAX_VALUE, O_VERBOSE),
         GET_REST_URL("getRestURL", "gru", "{relative-path}", "do a GET on a REST URL relative to the mailbox", Category.MISC, 1, 1,
                 O_OUTPUT_FILE, O_START_TIME, O_END_TIME, O_URL),
@@ -2258,8 +2258,9 @@ public class ZMailboxUtil implements DebugListener {
         for(String contact: Splitter.on(",").trimResults().split(args[0])) {
             contacts.add(contact);
         }
-        Integer limit = args.length == 2 ? null : Integer.valueOf(args[2]);
-        dumpSearches(mMbox.getRelatedContacts(contacts, args[1], limit), "Related Contacts");
+        String type = param(args, 1, "all");
+        String dsId = param(args, 2);
+        dumpSearches(mMbox.getRelatedContacts(contacts, type, null, dsId), "Related Contacts");
     }
 
     private void doSearchConvRedisplay() {
