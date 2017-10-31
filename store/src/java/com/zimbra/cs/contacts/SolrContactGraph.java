@@ -45,6 +45,7 @@ import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Provisioning;
 import com.zimbra.cs.account.Server;
+import com.zimbra.cs.index.LuceneFields;
 import com.zimbra.cs.index.solr.AccountCollectionLocator;
 import com.zimbra.cs.index.solr.JointCollectionLocator;
 import com.zimbra.cs.index.solr.SolrCloudHelper;
@@ -56,7 +57,6 @@ public class SolrContactGraph extends ContactGraph {
 
     private static final String FLD_NODE = "node";
 
-    private static final String FLD_ACCT_ID = "acct_id";
     private static final String FLD_EDGE_ID = "id";
     private static final String FLD_FROM = "from";
     private static final String FLD_TO = "to";
@@ -83,7 +83,7 @@ public class SolrContactGraph extends ContactGraph {
     }
 
     private String getAccountFilter() {
-        return new TermQuery(new Term(FLD_ACCT_ID, accountId)).toString();
+        return new TermQuery(new Term(LuceneFields.L_ACCOUNT_ID, accountId)).toString();
     }
 
     TupleStream getInitialSearchStream(String zkHost, String collection, Collection<ContactNode> contacts) throws IOException {
@@ -95,7 +95,9 @@ public class SolrContactGraph extends ContactGraph {
 
         Map<String, String> searchParams = new HashMap<>();
         searchParams.put("q", query.toString());
-        searchParams.put("fq", getAccountFilter());
+        if (solrHelper.needsAccountFilter()) {
+            searchParams.put("fq", getAccountFilter());
+        }
         searchParams.put("fl", FLD_FROM);
         searchParams.put("sort", FLD_FROM + " desc");
         searchParams.put("qt", "/export");
@@ -106,7 +108,7 @@ public class SolrContactGraph extends ContactGraph {
     private BooleanQuery.Builder newBooleanQueryBuilder() {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         if (solrHelper.needsAccountFilter()) {
-            builder.add(new TermQuery(new Term(FLD_ACCT_ID, accountId)), Occur.MUST);
+            builder.add(new TermQuery(new Term(LuceneFields.L_ACCOUNT_ID, accountId)), Occur.MUST);
         }
         return builder;
     }
@@ -175,7 +177,6 @@ public class SolrContactGraph extends ContactGraph {
     @Override
     public List<ContactResult> getRelatedContacts(ContactsParams params) throws ServiceException {
         Collection<ContactNode> contacts = params.getInputContacts();
-        EdgeType type = params.getEdgeType();
         int numResults = params.getNumResults();
         int lowerBound = params.getLowerBound();
         Long cutoff = params.hasUpdateCutoff() ? params.getUpdateCutoff() : null;
@@ -185,9 +186,10 @@ public class SolrContactGraph extends ContactGraph {
         String zkHost = solrHelper.getZkHost();
         String collection = solrHelper.getCoreName(accountId);
 
-        try(TupleStream stream = getStreamingQuery(zkHost, collection, getEdgeWeightField(type.getName()),
-                getEdgeUpdateField(type.getName()), lowerBound, cutoff, numResults, contacts)) {
-            String weightField = String.format("sum(%s)", getEdgeWeightField(type.getName()));
+        String edgeName = params.isAllEdges() ? COMBINED_EDGE_NAME : params.getEdgeType().getName();
+        try(TupleStream stream = getStreamingQuery(zkHost, collection, getEdgeWeightField(edgeName),
+                getEdgeUpdateField(edgeName), lowerBound, cutoff, numResults, contacts)) {
+            String weightField = String.format("sum(%s)", getEdgeWeightField(edgeName));
             StreamContext context = new StreamContext();
             SolrClientCache cache = new SolrClientCache();
             context.setSolrClientCache(cache);
@@ -219,9 +221,9 @@ public class SolrContactGraph extends ContactGraph {
 
     private String getNodeName(ContactNode contactNode) {
         if (contactNode.hasDataSourceId()) {
-            return contactNode.getEmail();
-        } else {
             return String.format("%s:%s", contactNode.getDataSourceId(), contactNode.getEmail());
+        } else {
+            return contactNode.getEmail();
         }
     }
 
@@ -296,8 +298,8 @@ public class SolrContactGraph extends ContactGraph {
     private SolrInputDocument createEdgeDoc(ContactNode from, ContactNode to) {
         SolrInputDocument edgeDoc = new SolrInputDocument();
         edgeDoc.addField(FLD_EDGE_ID, generateDocId(from, to));
-        edgeDoc.addField(FLD_FROM, from);
-        edgeDoc.addField(FLD_TO, to);
+        edgeDoc.addField(FLD_FROM, from.getEmail());
+        edgeDoc.addField(FLD_TO, to.getEmail());
         return edgeDoc;
     }
 
@@ -378,20 +380,23 @@ public class SolrContactGraph extends ContactGraph {
                 SolrCollectionLocator coreLocator;
                 switch(server.getContactAffinityIndexType()) {
                 case combined:
-                    coreLocator = new AccountCollectionLocator(COLLECTION_NAME_OR_PREFIX);
+                    coreLocator = new JointCollectionLocator(COLLECTION_NAME_OR_PREFIX);
                     break;
                 case account:
                 default:
-                    coreLocator = new JointCollectionLocator(COLLECTION_NAME_OR_PREFIX);
+                    coreLocator = new AccountCollectionLocator(COLLECTION_NAME_OR_PREFIX);
                 }
                 solrHelper = new SolrCloudHelper(coreLocator, client, CONFIGSET);
             } catch (ServiceException e) {
-                ZimbraLog.index.error("unable to determine contact affinity backend, disabling the feature");
+                ZimbraLog.index.error("unable to instantiate SolrContactGraph Factory", e);
             }
         }
 
         @Override
-        public ContactGraph getContactGraph(String accountId) {
+        public ContactGraph getContactGraph(String accountId) throws ServiceException {
+            if (solrHelper == null) {
+                throw ServiceException.FAILURE("SolrContactGraph Factory not configured", null);
+            }
             return new SolrContactGraph(solrHelper, accountId);
         }
 
