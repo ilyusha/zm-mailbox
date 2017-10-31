@@ -53,8 +53,10 @@ public abstract class ContactGraph {
     }
 
     public static void clearFactory() {
-        factory.shutdown();
-        factory = null;
+        if (factory != null) {
+            factory.shutdown();
+            factory = null;
+        }
     }
 
     public static final void setFactory(Class<? extends Factory> factoryClass) throws ServiceException {
@@ -331,7 +333,7 @@ public abstract class ContactGraph {
     }
 
     public static interface Factory {
-        public ContactGraph getContactGraph(String accountId);
+        public ContactGraph getContactGraph(String accountId) throws ServiceException;
         public void shutdown();
     }
 
