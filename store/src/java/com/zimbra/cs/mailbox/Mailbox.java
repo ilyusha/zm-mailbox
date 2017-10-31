@@ -2531,8 +2531,8 @@ public class Mailbox implements MailboxStore {
                     // attempt to nuke the store and index
                     try {
                         index.deleteIndex();
-                    } catch (IOException iox) {
-                        ZimbraLog.store.warn("Unable to delete index data", iox);
+                    } catch (ServiceException | IOException e) {
+                        ZimbraLog.store.warn("Unable to delete index data", e);
                     }
 
                     if (deleteStore) {
