@@ -25,7 +25,7 @@ public class EventLogger {
     private static final AtomicBoolean drainQueueBeforeShutdown = new AtomicBoolean(false);
     private ExecutorService executorService;
     private ConfigProvider config;
-    private boolean enabled;
+    private boolean enabled = true;
     private static EventLogger instance;
 
     private EventLogger(ConfigProvider config) {
