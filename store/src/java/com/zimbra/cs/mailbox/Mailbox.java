@@ -10741,7 +10741,6 @@ public class Mailbox implements MailboxStore {
             if (Strings.isNullOrEmpty(recipient)) {
                 ZimbraLog.event.warn("no recipient specified for message %d", msgId);
             } else {
-                String dsId = ctxt.getDataSourceId();
                 EventLogger.getEventLogger().log(Event.generateReceivedEvent(getAccountId(), msgId, sender, recipient, dsId));
             }
         }
@@ -10753,7 +10752,7 @@ public class Mailbox implements MailboxStore {
                     contactGraph.updateFromReceivedMimeMessage(pm.getMimeMessage(), timestamp, getAccount(), dsId);
                 }
             } catch (ServiceException e) {
-                ZimbraLog.event.warn("unable to get recipient account to update contact affinity", e);
+                ZimbraLog.event.warn("unable to update contact affinity", e);
             }
         }
 
