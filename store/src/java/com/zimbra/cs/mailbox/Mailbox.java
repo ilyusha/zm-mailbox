@@ -2547,6 +2547,11 @@ public class Mailbox implements MailboxStore {
                     } catch (ServiceException e) {
                         ZimbraLog.event.warn("Unable to delete event data for account %s", getAccountId(), e);
                     }
+                    try {
+                        ContactGraph.getFactory().getContactGraph(getAccountId()).deleteGraph();
+                    } catch (ServiceException e) {
+                        ZimbraLog.contact.warn("Unable to delete contact affinity data for account %s", getAccountId(), e);
+                    }
                 }
             } finally {
                 if (needRedo) {
