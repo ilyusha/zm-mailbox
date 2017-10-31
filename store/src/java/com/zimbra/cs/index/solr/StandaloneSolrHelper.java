@@ -48,6 +48,5 @@ public class StandaloneSolrHelper extends SolrRequestHelper {
         } catch (IOException e) {
             throw ServiceException.FAILURE(String.format("unable to execute Solr request for account %s", accountId), e);
         }
-
     }
 }

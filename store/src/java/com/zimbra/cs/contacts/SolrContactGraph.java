@@ -317,15 +317,8 @@ public class SolrContactGraph extends ContactGraph {
 
     @Override
     public void deleteGraph() throws ServiceException {
-        UpdateRequest req = solrHelper.newRequest(accountId);
-        BooleanQuery.Builder builder = newBooleanQueryBuilder();
-        BooleanQuery.Builder edgeQueryBuilder = new BooleanQuery.Builder();
-        builder.add(edgeQueryBuilder.build(), Occur.MUST);
-        edgeQueryBuilder.add(new TermQuery(new Term(FLD_FROM, "*")), Occur.SHOULD);
-        edgeQueryBuilder.add(new TermQuery(new Term(FLD_TO, "*")), Occur.SHOULD);
-        builder.add(edgeQueryBuilder.build(), Occur.MUST);
-        req.deleteByQuery(builder.build().toString());
-        solrHelper.execute(accountId, req);
+        ZimbraLog.contact.info("deleting contact affinity graph for account %s", accountId);
+        solrHelper.deleteAccountData(accountId);
     }
 
     @Override

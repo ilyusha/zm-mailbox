@@ -2,10 +2,15 @@ package com.zimbra.cs.index.solr;
 
 import java.io.Closeable;
 
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.TermQuery;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.zimbra.common.service.ServiceException;
+import com.zimbra.cs.index.LuceneFields;
 
 /**
  * Helper class for building and routing Solr requests. There are two degrees of freedom that
@@ -27,6 +32,8 @@ public abstract class SolrRequestHelper implements Closeable {
 
     protected abstract void executeRequest(String accountId, UpdateRequest request) throws ServiceException;
 
+    public abstract void deleteIndex(String accountId) throws ServiceException;
+
     public void execute(String accountId, UpdateRequest request) throws ServiceException {
         if (request.getDocuments() != null) {
             for (SolrInputDocument doc: request.getDocuments()) {
@@ -44,5 +51,15 @@ public abstract class SolrRequestHelper implements Closeable {
         return locator.needsAccountFilter();
     }
 
-    public abstract void deleteIndex(String accountId) throws ServiceException;
+    public void deleteAccountData(String accountId) throws ServiceException {
+        if (needsAccountFilter()) {
+            UpdateRequest req = newRequest(accountId);
+            BooleanQuery.Builder builder = new BooleanQuery.Builder();
+            builder.add(new TermQuery(new Term(LuceneFields.L_ACCOUNT_ID, accountId)), Occur.MUST);
+            req.deleteByQuery(builder.build().toString());
+            execute(accountId, req);
+        } else {
+            deleteIndex(accountId);
+        }
+    }
 }

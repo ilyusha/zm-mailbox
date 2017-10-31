@@ -33,15 +33,7 @@ public class SolrEventStore extends EventStore {
     @Override
     public void deleteEventsByAccount() throws ServiceException {
         ZimbraLog.event.info("deleting events for account %s (zkHost=%s)", accountId, solrHelper.getZkHost());
-        if (solrHelper.needsAccountFilter()) {
-            UpdateRequest req = solrHelper.newRequest(accountId);
-            BooleanQuery.Builder builder = new BooleanQuery.Builder();
-            builder.add(new TermQuery(new Term(LuceneFields.L_ACCOUNT_ID, accountId)), Occur.MUST);
-            req.deleteByQuery(builder.build().toString());
-            solrHelper.execute(accountId, req);
-        } else {
-            solrHelper.deleteIndex(accountId);
-        }
+        solrHelper.deleteAccountData(accountId);
     }
 
     @Override

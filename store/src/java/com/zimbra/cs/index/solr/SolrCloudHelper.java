@@ -2,11 +2,16 @@ package com.zimbra.cs.index.solr;
 
 import java.io.IOException;
 
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.params.CoreAdminParams;
 
 import com.zimbra.common.service.ServiceException;
+import com.zimbra.cs.index.LuceneFields;
 
 public class SolrCloudHelper extends SolrRequestHelper {
 
