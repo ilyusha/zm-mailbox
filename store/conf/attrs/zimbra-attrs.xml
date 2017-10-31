@@ -9758,7 +9758,7 @@ TODO: delete them permanently from here
   <desc>URL of the event storage backend to be queried for event analytics</desc>
 </attr>
 
-<attr id="3046" name="zimbraContactAffinityEnabled" type="boolean" cardinality="single" optionalIn="globalConfig,server,alwaysOnCluster" flags="serverInherited,serverPreferAlwaysOn" callback="EventLoggerCallback" since="8.8.6">
+<attr id="3046" name="zimbraContactAffinityEnabled" type="boolean" cardinality="single" optionalIn="globalConfig,server,alwaysOnCluster" flags="serverInherited,serverPreferAlwaysOn" callback="ContactAffinityCallback" since="8.8.6">
   <desc>Whether event logging is enabled on the server</desc>
   <defaultCOSValue>TRUE</defaultCOSValue>
 </attr>
