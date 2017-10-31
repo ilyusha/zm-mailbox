@@ -31,10 +31,10 @@ public class GetRelatedContacts extends MailDocumentHandler {
         if (typeStr == null || typeStr.equalsIgnoreCase("all")) {
             params.setAllEdges();
         } else {
-            EdgeType type = EdgeType.getKnownEdgeType(typeStr);
+            EdgeType type = EdgeType.getKnownEdgeType(typeStr.toLowerCase());
             params.setEdgeType(type);
             if (type == null) {
-                throw ServiceException.INVALID_REQUEST(type + " is not a known contact affinity type", null);
+                throw ServiceException.INVALID_REQUEST(typeStr + " is not a known contact affinity type", null);
             }
         }
         params.setNumResults(parseLimit(req.getLimit()));
