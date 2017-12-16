@@ -56,6 +56,8 @@ public enum SortBy {
     PRIORITY_DESC("priorityDesc", Key.PRIORITY, Direction.DESC, ZimbraSortBy.priorityDesc),
     RELEVANCE_ASC("relevanceAsc", Key.RELEVANCE, Direction.ASC, ZimbraSortBy.relevanceAsc),
     RELEVANCE_DESC("relevanceDesc", Key.RELEVANCE, Direction.DESC, ZimbraSortBy.relevanceDesc),
+    UNREAD_ASC("unreadAsc", Key.UNREAD, Direction.ASC, ZimbraSortBy.unreadAsc),
+    UNREAD_DESC("unreadDesc", Key.UNREAD, Direction.DESC, ZimbraSortBy.unreadDesc),
 
     // wiki "natural order" sorts are not exposed via SOAP
     NAME_NATURAL_ORDER_ASC(null, Key.NAME_NATURAL_ORDER, Direction.ASC, null),
@@ -73,7 +75,7 @@ public enum SortBy {
     TASK_PERCENT_COMPLETE_DESC("taskPercCompletedDesc", Key.DATE, Direction.DESC, ZimbraSortBy.taskPercCompletedDesc);
 
     public enum Key {
-        DATE, SENDER, RCPT, SUBJECT, ID, NONE, NAME, NAME_NATURAL_ORDER, SIZE, ATTACHMENT, FLAG, PRIORITY, RELEVANCE;
+        DATE, SENDER, RCPT, SUBJECT, ID, NONE, NAME, NAME_NATURAL_ORDER, SIZE, ATTACHMENT, FLAG, PRIORITY, RELEVANCE, UNREAD;
     }
 
     public enum Direction {

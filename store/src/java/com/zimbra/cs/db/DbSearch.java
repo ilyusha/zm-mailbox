@@ -149,6 +149,9 @@ public final class DbSearch {
                 return db.concat("(1 + " + db.sign(db.bitAND("mi.flags", String.valueOf(Flag.BITMASK_HIGH_PRIORITY))) +
                         " - " + db.sign(db.bitAND("mi.flags", String.valueOf(Flag.BITMASK_LOW_PRIORITY))) + ")",
                         db.lpad("mi.id", 10, "0"));
+            case UNREAD:
+                return db.concat(db.sign(db.bitAND("mi.flags", String.valueOf(Flag.BITMASK_UNREAD))),
+                        db.lpad("mi.id", 10, "0"));
             case DATE:
             default:
                return "mi.date";
