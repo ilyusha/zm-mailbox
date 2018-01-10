@@ -9800,4 +9800,26 @@ TODO: delete them permanently from here
     <desc>The names of classifiers to be used for handling known classification tasks.
       Format is taskName:classifierLabel[:probThreshold].</desc>
 </attr>
+
+<attr id="3054" name="zimbraExclusiveSmartFolders" type="string" cardinality="multi" optionalIn="globalConfig,server" flags="serverInherited" since="8.8.6" callback="ResolveClassifiers">
+  <desc>Exclusive smart folders incoming messages can be classified into.
+    If the format is "[labelName]:[smartFolderName]", then an exclusive class label [labelName]
+    will result in the message being tagged with the SmartFolder [smartFolderName].
+    If the format is simply [smartFolderName], the exclusive class label must be a 
+    case-insensitive match to [smartFolderName].
+  </desc>
+  <globalConfigValue>w:work</globalConfigValue>
+  <globalConfigValue>sh:shopping</globalConfigValue>
+  <globalConfigValue>so:social</globalConfigValue>
+  <globalConfigValue>f:finance</globalConfigValue>
+</attr>
+
+<attr id="3055" name="zimbraOverlappingSmartFolders" type="string" cardinality="multi" optionalIn="globalConfig,server" flags="serverInherited" since="8.8.6" callback="ResolveClassifiers">
+  <desc>Overlapping smart folders incoming messages can be classified into.
+    If the format is "[labelName]:[smartFolderName]", then an overlapping class label [labelName]
+    will result in the message being tagged with the SmartFolder [smartFolderName].
+    If the format is simply [smartFolderName], the overlapping class label must be a 
+    case-insensitive match to [smartFolderName].</desc>
+  <globalConfigValue>i:Important</globalConfigValue>
+</attr>
 </attrs>
