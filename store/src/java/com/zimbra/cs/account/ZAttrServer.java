@@ -9234,6 +9234,185 @@ public abstract class ZAttrServer extends NamedEntry {
     }
 
     /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @return zimbraExclusiveSmartFolders, or empty array if unset
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public String[] getExclusiveSmartFolders() {
+        String[] value = getMultiAttr(Provisioning.A_zimbraExclusiveSmartFolders, true, true); return value.length > 0 ? value : new String[] {"w:work","sh:shopping","so:social","f:finance"};
+    }
+
+    /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraExclusiveSmartFolders new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public void setExclusiveSmartFolders(String[] zimbraExclusiveSmartFolders) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraExclusiveSmartFolders, zimbraExclusiveSmartFolders);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraExclusiveSmartFolders new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public Map<String,Object> setExclusiveSmartFolders(String[] zimbraExclusiveSmartFolders, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraExclusiveSmartFolders, zimbraExclusiveSmartFolders);
+        return attrs;
+    }
+
+    /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraExclusiveSmartFolders new to add to existing values
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public void addExclusiveSmartFolders(String zimbraExclusiveSmartFolders) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        StringUtil.addToMultiMap(attrs, "+" + Provisioning.A_zimbraExclusiveSmartFolders, zimbraExclusiveSmartFolders);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraExclusiveSmartFolders new to add to existing values
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public Map<String,Object> addExclusiveSmartFolders(String zimbraExclusiveSmartFolders, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        StringUtil.addToMultiMap(attrs, "+" + Provisioning.A_zimbraExclusiveSmartFolders, zimbraExclusiveSmartFolders);
+        return attrs;
+    }
+
+    /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraExclusiveSmartFolders existing value to remove
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public void removeExclusiveSmartFolders(String zimbraExclusiveSmartFolders) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        StringUtil.addToMultiMap(attrs, "-" + Provisioning.A_zimbraExclusiveSmartFolders, zimbraExclusiveSmartFolders);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraExclusiveSmartFolders existing value to remove
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public Map<String,Object> removeExclusiveSmartFolders(String zimbraExclusiveSmartFolders, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        StringUtil.addToMultiMap(attrs, "-" + Provisioning.A_zimbraExclusiveSmartFolders, zimbraExclusiveSmartFolders);
+        return attrs;
+    }
+
+    /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public void unsetExclusiveSmartFolders() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraExclusiveSmartFolders, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public Map<String,Object> unsetExclusiveSmartFolders(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraExclusiveSmartFolders, "");
+        return attrs;
+    }
+
+    /**
      * interface address on which zimbra extension server should listen; if
      * empty, binds to all interfaces
      *
@@ -38638,6 +38817,185 @@ public abstract class ZAttrServer extends NamedEntry {
     public Map<String,Object> unsetOpenidConsumerStatelessModeEnabled(Map<String,Object> attrs) {
         if (attrs == null) attrs = new HashMap<String,Object>();
         attrs.put(Provisioning.A_zimbraOpenidConsumerStatelessModeEnabled, "");
+        return attrs;
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @return zimbraOverlappingSmartFolders, or empty array if unset
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public String[] getOverlappingSmartFolders() {
+        String[] value = getMultiAttr(Provisioning.A_zimbraOverlappingSmartFolders, true, true); return value.length > 0 ? value : new String[] {"i:Important"};
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraOverlappingSmartFolders new value
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public void setOverlappingSmartFolders(String[] zimbraOverlappingSmartFolders) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraOverlappingSmartFolders, zimbraOverlappingSmartFolders);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraOverlappingSmartFolders new value
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public Map<String,Object> setOverlappingSmartFolders(String[] zimbraOverlappingSmartFolders, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraOverlappingSmartFolders, zimbraOverlappingSmartFolders);
+        return attrs;
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraOverlappingSmartFolders new to add to existing values
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public void addOverlappingSmartFolders(String zimbraOverlappingSmartFolders) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        StringUtil.addToMultiMap(attrs, "+" + Provisioning.A_zimbraOverlappingSmartFolders, zimbraOverlappingSmartFolders);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraOverlappingSmartFolders new to add to existing values
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public Map<String,Object> addOverlappingSmartFolders(String zimbraOverlappingSmartFolders, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        StringUtil.addToMultiMap(attrs, "+" + Provisioning.A_zimbraOverlappingSmartFolders, zimbraOverlappingSmartFolders);
+        return attrs;
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraOverlappingSmartFolders existing value to remove
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public void removeOverlappingSmartFolders(String zimbraOverlappingSmartFolders) throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        StringUtil.addToMultiMap(attrs, "-" + Provisioning.A_zimbraOverlappingSmartFolders, zimbraOverlappingSmartFolders);
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param zimbraOverlappingSmartFolders existing value to remove
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public Map<String,Object> removeOverlappingSmartFolders(String zimbraOverlappingSmartFolders, Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        StringUtil.addToMultiMap(attrs, "-" + Provisioning.A_zimbraOverlappingSmartFolders, zimbraOverlappingSmartFolders);
+        return attrs;
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @throws com.zimbra.common.service.ServiceException if error during update
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public void unsetOverlappingSmartFolders() throws com.zimbra.common.service.ServiceException {
+        HashMap<String,Object> attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraOverlappingSmartFolders, "");
+        getProvisioning().modifyAttrs(this, attrs);
+    }
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @param attrs existing map to populate, or null to create a new map
+     * @return populated map to pass into Provisioning.modifyAttrs
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public Map<String,Object> unsetOverlappingSmartFolders(Map<String,Object> attrs) {
+        if (attrs == null) attrs = new HashMap<String,Object>();
+        attrs.put(Provisioning.A_zimbraOverlappingSmartFolders, "");
         return attrs;
     }
 

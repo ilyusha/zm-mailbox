@@ -5993,6 +5993,19 @@ public class ZAttrProvisioning {
     public static final String A_zimbraExcludeFromCMBSearch = "zimbraExcludeFromCMBSearch";
 
     /**
+     * Exclusive smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * exclusive class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the exclusive class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3054)
+    public static final String A_zimbraExclusiveSmartFolders = "zimbraExclusiveSmartFolders";
+
+    /**
      * Maximum period in days for export, including start and end date. No
      * limit if set to non-positive integer or unset.
      *
@@ -12101,6 +12114,19 @@ public class ZAttrProvisioning {
      */
     @ZAttr(id=3012)
     public static final String A_zimbraOpenImapFolderRequestChunkSize = "zimbraOpenImapFolderRequestChunkSize";
+
+    /**
+     * Overlapping smart folders incoming messages can be classified into. If
+     * the format is &quot;[labelName]:[smartFolderName]&quot;, then an
+     * overlapping class label [labelName] will result in the message being
+     * tagged with the SmartFolder [smartFolderName]. If the format is simply
+     * [smartFolderName], the overlapping class label must be a
+     * case-insensitive match to [smartFolderName].
+     *
+     * @since ZCS 8.8.6
+     */
+    @ZAttr(id=3055)
+    public static final String A_zimbraOverlappingSmartFolders = "zimbraOverlappingSmartFolders";
 
     /**
      * regex of allowed characters in password
