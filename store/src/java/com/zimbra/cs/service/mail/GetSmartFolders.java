@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.soap.Element;
+import com.zimbra.cs.mailbox.LdapSmartFolderProvider;
 import com.zimbra.cs.mailbox.Mailbox;
 import com.zimbra.cs.mailbox.OperationContext;
 import com.zimbra.cs.mailbox.SmartFolder;
@@ -21,6 +22,7 @@ public class GetSmartFolders extends MailDocumentHandler {
         ZimbraSoapContext zsc = getZimbraSoapContext(context);
         Mailbox mbox = getRequestedMailbox(zsc);
         OperationContext octxt = getOperationContext(zsc, context);
+        mbox.syncSmartFolders(octxt, new LdapSmartFolderProvider());
         List<SmartFolder> smartFolders = new ArrayList<>();
         for (SmartFolder sf: mbox.getSmartFolders(octxt)) {
             smartFolders.add(sf);
