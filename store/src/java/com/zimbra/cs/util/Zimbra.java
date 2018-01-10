@@ -70,6 +70,7 @@ import com.zimbra.cs.mailbox.PurgeThread;
 import com.zimbra.cs.mailbox.ScheduledTaskManager;
 import com.zimbra.cs.mailbox.acl.AclPushTask;
 import com.zimbra.cs.memcached.MemcachedConnector;
+import com.zimbra.cs.ml.classifier.SmartFolderClassificationTasks;
 import com.zimbra.cs.redolog.RedoLogProvider;
 import com.zimbra.cs.server.ServerManager;
 import com.zimbra.cs.servlet.FirstServlet;
@@ -284,6 +285,8 @@ public final class Zimbra {
 
         EventStore.registerFactory("solr", StandaloneSolrEventStore.Factory.class.getName());
         EventStore.registerFactory("solrcloud", SolrCloudEventStore.Factory.class.getName());
+
+        SmartFolderClassificationTasks.registerTasks();
 
         try {
             StoreManager.getInstance().startup();
