@@ -105,7 +105,7 @@ public class VirtualConversation extends Conversation {
         data.size = 1;
         data.unreadCount = msg.getUnreadCount();
         data.setFlags(msg.getInternalFlagBitmask());
-        data.setTags(new Tag.NormalizedTags(msg.getTags()));
+        data.setTags(new Tag.NormalizedTags(msg.getTags(), msg.getSmartFolders()));
         data.metadata = encodeMetadata(DEFAULT_COLOR_RGB, 1, 1, extended, new SenderList(msg));
         return data;
     }

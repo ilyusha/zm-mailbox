@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
@@ -33,8 +35,6 @@ import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Account;
 import com.zimbra.cs.db.DbMailItem;
 import com.zimbra.cs.db.DbTag;
-import com.zimbra.cs.mailbox.MailItem.Type;
-import com.zimbra.cs.mailbox.MailItem.UnderlyingData;
 import com.zimbra.cs.mailbox.MailServiceException.NoSuchItemException;
 import com.zimbra.cs.session.PendingModifications.Change;
 import com.zimbra.soap.mail.type.RetentionPolicy;
@@ -97,8 +97,20 @@ public class Tag extends MailItem implements ZimbraTag {
             this(tagsFromDB == null ? null : tagsFromDB.toArray(new String[tagsFromDB.size()]));
         }
 
+        public NormalizedTags(String[] tagsFromDB, String[] smartFoldersFromDB) {
+            if (tagsFromDB == null && smartFoldersFromDB == null) {
+                this.tags = NO_TAGS;
+            } else if (tagsFromDB != null && smartFoldersFromDB != null) {
+                this.tags = (String[])ArrayUtils.addAll(tagsFromDB, smartFoldersFromDB);
+            } else if (tagsFromDB != null) {
+                this.tags = tagsFromDB;
+            } else {
+                this.tags = smartFoldersFromDB;
+            }
+        }
+
         public NormalizedTags(String[] tagsFromDB) {
-            this.tags = tagsFromDB == null ? NO_TAGS : tagsFromDB;
+            this(tagsFromDB, null);
         }
 
         String[] getTags() {
