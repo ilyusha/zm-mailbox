@@ -6,6 +6,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,13 +17,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.zimbra.common.service.ServiceException;
+import com.zimbra.cs.account.Provisioning;
+import com.zimbra.cs.account.Server;
 import com.zimbra.cs.event.Event.EventType;
+import com.zimbra.cs.event.analytics.EventMetric.MetricInitializer;
 import com.zimbra.cs.event.analytics.RatioMetric;
 import com.zimbra.cs.event.analytics.RatioMetric.RatioIncrement;
 import com.zimbra.cs.event.analytics.ValueMetric;
-import com.zimbra.cs.event.analytics.EventMetric.MetricInitializer;
 import com.zimbra.cs.event.analytics.ValueMetric.IntIncrement;
 import com.zimbra.cs.event.analytics.contact.ContactAnalytics.ContactFrequencyTimeRange;
+import com.zimbra.cs.mailbox.LdapSmartFolderProvider;
 import com.zimbra.cs.mailbox.Mailbox;
 import com.zimbra.cs.mailbox.MailboxTestUtil;
 import com.zimbra.cs.mailbox.Message;
@@ -57,16 +61,19 @@ public class ClassifierManagerTest {
 
     private static final String USER = "classifierManagerTest";
 
-    private static final String[] EXCLUSIVE_CLASSES = new String[] {"exclusive1", "exclusive2"};
-    private static final String[] OVERLAPPING_CLASSES = new String[] {"overlapping1", "overlapping2"};
+    private static final String[] EXCLUSIVE_CLASSES = new String[] {"work", "social", "shopping", "finance"};
+    private static final String[] OVERLAPPING_CLASSES = new String[] {"important"};
+    private int counter = 1;
 
     private ClassifierRegistry registry;
     private ClassifierManager manager;
+    private Mailbox mbox;
 
     @Before
     public void setUp() throws Exception {
         MailboxTestUtil.initServer();
         TestUtil.createAccount(USER);
+        mbox = TestUtil.getMailbox(USER);
         registry = new LdapClassifierRegistry();
         manager = ClassifierManager.getInstance();
         MachineLearningBackend.setFactory(DummyMachineLearningBackend.Factory.class.getName());
@@ -288,9 +295,8 @@ public class ClassifierManagerTest {
         ClassifierUsageInfo<Message> usage = context.getClassifierUsage(classifier);
         assertEquals("testClassifier should be assigned to testTask", "testTask", usage.getTasks().get(0).getTaskName());
 
-        Mailbox mbox = TestUtil.getMailbox(USER);
+        Message msg = TestUtil.addMessage(mbox, "important work message");
 
-        Message msg = TestUtil.addMessage(mbox, "exclusive1 message");
         context.execute(msg);
         assertTrue("classification callback should have been executed", flag.get());
 
@@ -299,6 +305,95 @@ public class ClassifierManagerTest {
         assertTrue("no tasks should be registered", manager.getAllTasks().isEmpty());
         context = manager.resolveConfig(config);
         assertFalse("execution context shouldn't have any resolved tasks", context.hasResolvedTasks());
+    }
+
+    private void verifySmartFolderTask(ClassificationExecutionContext<Message> context, String... expectedSmartFolders) throws Exception {
+        Message msg = TestUtil.addMessage(mbox, String.format("important work message %s", counter));
+        counter++;
+        context.execute(msg);
+        //re-fetch message because it may have been uncached
+        msg = mbox.getMessageById(null, msg.getId());
+        List<String> smartFolders = Arrays.asList(msg.getSmartFolders());
+        int expectedNum = expectedSmartFolders.length;
+        assertEquals(String.format("message should have %d smart folders", expectedNum), expectedNum, smartFolders.size());
+    }
+
+    @Test
+    public void testSmartFolderClassificationTask() throws Exception {
+
+        String classifierName1 = "testClassifier1";
+        String classifierName2 = "testClassifier2";
+
+        ClassifierManager manager = ClassifierManager.getInstance();
+
+        Server server = Provisioning.getInstance().getLocalServer();
+        server.setExclusiveSmartFolders(new String[] {"work", "social", "shopping", "finance"});
+        server.setOverlappingSmartFolders(new String[] {"important"});
+
+        mbox.syncSmartFolders(null, new LdapSmartFolderProvider());
+
+        SmartFolderClassificationTasks.registerTasks();
+
+        List<ClassificationTask<?>> tasks = manager.getAllTasks();
+        Map<String, ClassificationTask<?>> taskMap = new HashMap<>();
+        for (ClassificationTask<?> task: tasks) {
+            taskMap.put(task.getTaskName(), task);
+        }
+        assertEquals("should see two registered tasks", 2, tasks.size());
+        assertTrue("exclusive task not registered", taskMap.containsKey("exclusive-smart-folders"));
+        assertTrue("overlapping task not registered", taskMap.containsKey("folder-important"));
+
+        Classifier<Message> classifier1 = manager.registerClassifier(new ClassifierData<Message>(ClassifiableType.MESSAGE, classifierName1, getSpec(), getFeatureSet(true)));
+        Classifier<Message> classifier2 = manager.registerClassifier(new ClassifierData<Message>(ClassifiableType.MESSAGE, classifierName2, getSpec(), getFeatureSet(true)));
+
+        //the task shouldn't have any assignments initially
+        ClassificationTaskConfigProvider taskConfig = new DummyClassificationTaskConfigProvider();
+        ClassificationExecutionContext<Message> context = manager.resolveConfig(taskConfig);
+        assertFalse("execution context should not have resolved tasks", context.hasResolvedTasks());
+        assertTrue("no classifier usage should be set", context.getInfo().isEmpty());
+
+        //no smart folders should be applied
+        verifySmartFolderTask(context);
+
+        //assign exclusive folders task to classifier1
+        taskConfig.assignClassifier("exclusive-smart-folders", classifier1);
+
+        //test that classifier1 is part of the execution context
+        context = manager.resolveConfig(taskConfig);
+        assertTrue("execution context should have resolved tasks", context.hasResolvedTasks());
+        assertEquals("should see one resolved classifier", 1, context.getInfo().size());
+        ClassifierUsageInfo<Message> usage = context.getClassifierUsage(classifier1);
+        assertEquals("classifier1 should be assigned to one task", 1, usage.getTasks().size());
+        assertEquals("classifier1 should be assigned to exclusive-smart-folders", "exclusive-smart-folders", usage.getTasks().get(0).getTaskName());
+
+        //only the "work" smart folder should be applied
+        verifySmartFolderTask(context, "work");
+
+        //assign importance task to classifier1
+        taskConfig.assignClassifier("folder-important", classifier1, 0.5f);
+        context = manager.resolveConfig(taskConfig);
+        assertEquals("should see one resolved classifier", 1, context.getInfo().size());
+        usage = context.getClassifierUsage(classifier1);
+        assertEquals("classifier1 should be assigned to two tasks", 2, usage.getTasks().size());
+
+        //both "work" and "important" smart folders should be applied
+        verifySmartFolderTask(context, "work", "important");
+
+        //assign importance task to classifier2
+        taskConfig.assignClassifier("folder-important", classifier2, 0.5f);
+        context = manager.resolveConfig(taskConfig);
+        assertEquals("should see two resolved classifier", 2, context.getInfo().size());
+
+        ClassifierUsageInfo<Message> usage1 = context.getClassifierUsage(classifier1);
+        assertEquals("classifier1 should be assigned to one task", 1, usage1.getTasks().size());
+        assertEquals("classifier1 should be assigned to exclusive-smart-folders task", "exclusive-smart-folders", usage1.getTasks().get(0).getTaskName());
+
+        ClassifierUsageInfo<Message> usage2 = context.getClassifierUsage(classifier2);
+        assertEquals("classifier2 should be assigned to one task",1, usage2.getTasks().size());
+        assertEquals("classifier2 should be assigned to folder-important task", "folder-important", usage2.getTasks().get(0).getTaskName());
+
+        //both "work" and "important" smart folders should be applied
+        verifySmartFolderTask(context, "work", "important");
     }
 
     private static class DummyClassificationTaskConfigProvider extends ClassificationTaskConfigProvider {
