@@ -411,6 +411,7 @@ public abstract class MailItem implements Comparable<MailItem>, ScheduledTaskRes
             data.size = this.size;
             data.flags = this.flags;
             data.tags = this.tags;
+            data.smartFolders = this.smartFolders;
             data.subject = this.subject;
             data.name = this.name;
             data.unreadCount = this.unreadCount;
@@ -457,6 +458,7 @@ public abstract class MailItem implements Comparable<MailItem>, ScheduledTaskRes
         private static final String FN_UNREAD_COUNT = "uc";
         private static final String FN_FLAGS        = "fg";
         private static final String FN_TAGS         = "tg";
+        private static final String FN_SMARTFOLDERS = "sf";
         private static final String FN_SUBJECT      = "sbj";
         private static final String FN_NAME         = "nm";
         private static final String FN_METADATA     = "meta";
@@ -480,6 +482,7 @@ public abstract class MailItem implements Comparable<MailItem>, ScheduledTaskRes
             meta.put(FN_UNREAD_COUNT, unreadCount);
             meta.put(FN_FLAGS, flags);
             meta.put(FN_TAGS, DbTag.serializeTags(tags));
+            meta.put(FN_SMARTFOLDERS, DbTag.serializeTags(smartFolders));
             meta.put(FN_SUBJECT, subject);
             meta.put(FN_NAME, name);
             meta.put(FN_METADATA, metadata);
@@ -504,7 +507,7 @@ public abstract class MailItem implements Comparable<MailItem>, ScheduledTaskRes
             this.unreadCount = (int) meta.getLong(FN_UNREAD_COUNT, 0);
             setFlags((int) meta.getLong(FN_FLAGS, 0));
             // are the tags ever non-null? we're assuming that they aren't...
-            setTags(new Tag.NormalizedTags(DbTag.deserializeTags(meta.get(FN_TAGS, null))));
+            setTags(new Tag.NormalizedTags(DbTag.deserializeTags(meta.get(FN_TAGS, null)), DbTag.deserializeTags(meta.get(FN_SMARTFOLDERS, null))));
             this.subject = meta.get(FN_SUBJECT, null);
             this.name = meta.get(FN_NAME, null);
             this.metadata = meta.get(FN_METADATA, null);
@@ -2526,7 +2529,7 @@ public abstract class MailItem implements Comparable<MailItem>, ScheduledTaskRes
             }
         } else {
             Set<String> tags = Sets.newLinkedHashSet();
-            Collections.addAll(tags, mData.getTags());
+            Collections.addAll(tags, tag.getName().startsWith(Tag.SMARTFOLDER_NAME_PREFIX) ? mData.getSmartFolders() : mData.getTags());
             if (add) {
                 tags.add(tag.getName());
             } else {
