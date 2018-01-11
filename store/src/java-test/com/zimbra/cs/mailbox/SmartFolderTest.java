@@ -1,6 +1,8 @@
 package com.zimbra.cs.mailbox;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,12 +64,17 @@ public class SmartFolderTest {
     @Test
     public void testTagWithSmartFolder() throws Exception {
         Message msg = TestUtil.addMessage(mbox, MailboxTestUtil.generateMessage("smartfolder test"));
-        SmartFolder smartFolder = mbox.createSmartFolder(null, "finance");
-        mbox.alterTag(null, msg.getId(), Type.MESSAGE, smartFolder.getName(), true, null);
+        SmartFolder smartFolder1 = mbox.createSmartFolder(null, "finance");
+        SmartFolder smartFolder2 = mbox.createSmartFolder(null, "work");
+        mbox.alterTag(null, msg.getId(), Type.MESSAGE, smartFolder1.getName(), true, null);
         assertEquals("message should not have any tags", 0, msg.getTags().length);
         String[] smartFolders = msg.getSmartFolders();
         assertEquals("message should have one tag", 1, smartFolders.length);
+        assertEquals("message should be tagged with finance", "\\\\finance", smartFolders[0]);
         assertEquals("wrong internal tag name", SmartFolder.getInternalTagName("finance"), smartFolders[0]);
+        mbox.alterTag(null, msg.getId(), Type.MESSAGE, smartFolder2.getName(), true, null);
+        smartFolders = msg.getSmartFolders();
+        assertEquals("message should have two tags", 2, smartFolders.length);
     }
 
     @Test
