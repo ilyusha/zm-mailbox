@@ -1,5 +1,6 @@
 package com.zimbra.cs.ml;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -14,6 +15,8 @@ import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.UUIDUtil;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.mime.Mime;
+import com.zimbra.cs.ml.classifier.ClassifierData;
+import com.zimbra.cs.ml.classifier.ClassifierXmlLoader;
 import com.zimbra.cs.ml.query.CreateClassifierQuery;
 import com.zimbra.cs.ml.query.DeleteClassifierQuery;
 import com.zimbra.cs.ml.query.GetClassifierQuery;
@@ -39,6 +42,24 @@ public class DummyMachineLearningBackend extends MachineLearningBackend {
 
     public DummyMachineLearningBackend() {
         knownClassifiers = new HashMap<>();
+        initDummyClassifiers();
+    }
+
+    private void initDummyClassifiers() {
+        //registers ClassifierInfo instances that correspond to default classifiers.
+        //this lets us run zmclassifierutil commands as if the classifiers are actually stored
+        //on the backend.
+        ClassifierXmlLoader loader = new ClassifierXmlLoader();
+        List<ClassifierData<?>> classifiers;
+        try {
+            classifiers = loader.loadDirectory(new File("/home/zimbra/zm-mailbox/store/conf/classifiers"));
+            for (ClassifierData<?> classifierData: classifiers) {
+                ClassifierSpec spec = classifierData.getSpec();
+                addKnownClassifier(ClassifierInfo.fromSpec(spec.getClassifierId(), spec));
+            }
+        } catch (ServiceException e) {
+            ZimbraLog.ml.error("unable to load default classifiers", e);
+        }
     }
 
     private void addKnownClassifier(ClassifierInfo info) {
