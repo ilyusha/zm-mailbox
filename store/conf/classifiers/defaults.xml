@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<classifiers>
+
+	<classifier type="message">
+		<name>joint-classifier</name>
+		<id>joint-classifier-id</id>
+		<description>joint classifier capable of classifying smart folders and important emails together</description>
+		<exclusiveClasses>work,shopping,financial,social</exclusiveClasses>
+		<overlappingClasses>important</overlappingClasses>
+		<numSubjectWords>8</numSubjectWords>
+		<numBodyWords>52</numBodyWords>
+		<features>
+			<feature type="IS_PART_OF_CONVERSATION"/>
+			<feature type="RECIPIENT_FIELD"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="TO"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="CC"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="ALL"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_DAY"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_WEEK"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_MONTH"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="FOREVER"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_DAY"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_WEEK"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_MONTH"/>
+			<feature type="SENT_FREQUENCY" time_range="FOREVER"/>
+			<feature type="TIME_DELTA" from_event="SEEN" to_event="READ"/>
+			<feature type="EVENT_RATIO" numerator="READ" denominator="SEEN"/>
+			<feature type="EVENT_RATIO" numerator="READ" denominator="REPLIED"/>
+		</features>
+	</classifier>
+
+	<classifier type="message">
+		<name>importance-classifier</name>
+		<id>importance-classifier-id</id>
+		<description>standalone classifier used for classifying important emails</description>
+		<exclusiveClasses>important,not-important</exclusiveClasses>
+		<numSubjectWords>8</numSubjectWords>
+		<numBodyWords>52</numBodyWords>
+		<features>
+			<feature type="IS_PART_OF_CONVERSATION"/>
+			<feature type="RECIPIENT_FIELD"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="TO"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="CC"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="ALL"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_DAY"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_WEEK"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_MONTH"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="FOREVER"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_DAY"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_WEEK"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_MONTH"/>
+			<feature type="SENT_FREQUENCY" time_range="FOREVER"/>
+			<feature type="TIME_DELTA" from_event="SEEN" to_event="READ"/>
+			<feature type="EVENT_RATIO" numerator="READ" denominator="SEEN"/>
+			<feature type="EVENT_RATIO" numerator="READ" denominator="REPLIED"/>
+		</features>
+	</classifier>
+
+	<classifier type="message">
+		<name>smart-folder-classifier</name>
+		<id>smart-folder-classifier-id</id>
+		<description>standalone classifier used for classifying smart folders</description>
+		<exclusiveClasses>work,shopping,financial,social</exclusiveClasses>
+		<numSubjectWords>8</numSubjectWords>
+		<numBodyWords>52</numBodyWords>
+		<features>
+			<feature type="IS_PART_OF_CONVERSATION"/>
+			<feature type="RECIPIENT_FIELD"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="TO"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="CC"/>
+			<feature type="NUM_RECIPIENTS" recipient_type="ALL"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_DAY"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_WEEK"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="LAST_MONTH"/>
+			<feature type="RECEIVED_FREQUENCY" time_range="FOREVER"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_DAY"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_WEEK"/>
+			<feature type="SENT_FREQUENCY" time_range="LAST_MONTH"/>
+			<feature type="SENT_FREQUENCY" time_range="FOREVER"/>
+			<feature type="TIME_DELTA" from_event="SEEN" to_event="READ"/>
+			<feature type="EVENT_RATIO" numerator="READ" denominator="SEEN"/>
+			<feature type="EVENT_RATIO" numerator="READ" denominator="REPLIED"/>
+		</features>
+	</classifier>
+
+</classifiers>
