@@ -107,8 +107,7 @@ public class ClassifierManager {
      * Return a {@link ClassificationExecutionContext} for the given classification configuration.
      */
     @SuppressWarnings("unchecked")
-    @VisibleForTesting
-    <T extends Classifiable> ClassificationExecutionContext<T> resolveConfig(ClassificationTaskConfigProvider configProvider) throws ServiceException {
+    public <T extends Classifiable> ClassificationExecutionContext<T> resolveConfig(ClassificationTaskConfigProvider configProvider) throws ServiceException {
         //TODO: this is OK while only Message implements Classifiable, this method uses unsafe casts.
         //Need to figure out how to get the execution context for a specific Classifiable type.
         Set<String> resolvedTasks = new HashSet<>();
