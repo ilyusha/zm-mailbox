@@ -47,6 +47,7 @@ import com.zimbra.cs.gal.GalGroup;
 import com.zimbra.cs.httpclient.URLUtil;
 import com.zimbra.cs.imap.ImapHandler;
 import com.zimbra.cs.mailclient.imap.ImapConnection;
+import com.zimbra.cs.ml.classifier.ClassifierManager;
 import com.zimbra.cs.service.AuthProvider;
 import com.zimbra.cs.util.SkinUtil;
 import com.zimbra.cs.util.WebClientL10nUtil;
@@ -160,6 +161,9 @@ public class FlushCache extends AdminDocumentHandler {
             if (!WebClientServiceUtil.isServerInSplitMode()) {
                 flushAllZimlets(context);
             }
+        case classifier:
+            ClassifierManager.getInstance().clearExecutionContextCache();
+            break;
             // fall through to also flush ldap entries
         default:
             flushLdapCache(cacheType, cacheSelector);
@@ -226,7 +230,7 @@ public class FlushCache extends AdminDocumentHandler {
 
     private static void flushCacheOnAllServers(ZimbraSoapContext zsc, FlushCacheRequest req) throws ServiceException {
         req.getCache().setAllServers(false);  // make sure we don't go round in loops
-   
+
         Provisioning prov = Provisioning.getInstance();
         String localServerId = prov.getLocalServer().getId();
 

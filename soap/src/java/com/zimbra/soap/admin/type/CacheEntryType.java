@@ -44,7 +44,8 @@ public enum CacheEntryType {
     mime,
     server,
     alwaysOnCluster,
-    zimlet;
+    zimlet,
+    classifier;
 
     private static Joiner PIPE_JOINER = Joiner.on("|");
 
