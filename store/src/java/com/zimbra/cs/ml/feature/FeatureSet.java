@@ -8,6 +8,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ArrayListMultimap;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.ZimbraLog;
+import com.zimbra.cs.mailbox.Message;
 import com.zimbra.cs.ml.Classifiable;
 import com.zimbra.cs.ml.feature.FeatureSpec.KnownFeature;
 
@@ -85,5 +86,27 @@ public class FeatureSet<T extends Classifiable> {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("features", featureList).toString();
+    }
+
+    public static interface Factory<T extends Classifiable> {
+
+        public FeatureSet<T> buildFeatureSet(List<String> encodedFeatures) throws ServiceException;
+    }
+
+    public static class MessageFeatureSetFactory implements Factory<Message> {
+
+        @Override
+        public FeatureSet<Message> buildFeatureSet(List<String> encodedFeatures) throws ServiceException {
+            FeatureSet<Message> featureSet = new FeatureSet<>();
+            for (String encodedFeatureSpec: encodedFeatures) {
+                try {
+                    featureSet.addFeatureSpec(new FeatureSpec<Message>(encodedFeatureSpec));
+                } catch (ServiceException e) {
+                    ZimbraLog.ml.warn("problem decoding Message feature", e);
+                }
+            }
+            return featureSet;
+        }
+
     }
 }

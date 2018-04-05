@@ -7,14 +7,13 @@ import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.ml.callback.ExclusiveClassCallback;
 import com.zimbra.cs.ml.callback.OverlappingClassCallback;
-import com.zimbra.cs.ml.schema.ClassificationResult;
 import com.zimbra.cs.ml.schema.OverlappingClassification;
 
 /**
  * This class reads classification results represented by {@link TextClasses}
  * and invokes callbacks based on the class labels.
  */
-public class ClassificationHandler<C extends Classifiable> {
+public class ClassificationHandler<C extends Classifiable, R extends Classification> {
 
     private ExclusiveClassCallback<C> exclusiveCallback;
     private Map<String, OverlappingClassCallback<C>> overlappingCallbacks;
@@ -55,7 +54,7 @@ public class ClassificationHandler<C extends Classifiable> {
         overlappingCallbacks.put(callback.getOverlappingClass().toLowerCase(), callback);
     }
 
-    public void handle(C item, ClassificationResult classification) throws ServiceException {
+    public void handle(C item, R classification) throws ServiceException {
         String exclusiveClass = classification.getExclusiveClass();
         if (exclusiveClass != null && exclusiveCallback != null) {
             ZimbraLog.ml.debug("executing %s for exclusive class [%s]", exclusiveCallback.getClass().getSimpleName(), exclusiveClass);

@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.ml.Classifiable;
+import com.zimbra.cs.ml.Classification;
 import com.zimbra.cs.ml.ClassificationExecutionContext;
 import com.zimbra.cs.ml.ClassificationExecutionContext.ClassifierUsageInfo;
 import com.zimbra.cs.ml.ClassificationHandler;
@@ -23,10 +24,8 @@ import com.zimbra.cs.ml.LdapClassificationTaskConfigProvider;
 import com.zimbra.cs.ml.callback.ClassificationCallback;
 import com.zimbra.cs.ml.callback.ExclusiveClassCallback;
 import com.zimbra.cs.ml.callback.OverlappingClassCallback;
-import com.zimbra.cs.ml.query.CreateClassifierQuery;
+import com.zimbra.cs.ml.feature.FeatureSet;
 import com.zimbra.cs.ml.query.DeleteClassifierQuery;
-import com.zimbra.cs.ml.query.ListClassifiersQuery;
-import com.zimbra.cs.ml.schema.ClassifierInfo;
 import com.zimbra.cs.ml.schema.ClassifierSpec;
 
 /**
@@ -36,12 +35,18 @@ import com.zimbra.cs.ml.schema.ClassifierSpec;
 public class ClassifierManager {
 
     private ClassifierRegistry registry;
-    private Map<String, ClassificationTask<?>> taskNameMap;
+    private Map<String, ClassificationTask<?, ?>> taskNameMap;
+    private static Map<String, AbstractClassifier.Factory<?,?>> classifierFctories;
+    private static Map<String, FeatureSet.Factory<?>> featureSetFactories;
+    static {
+        registerClassifierFactory(MessageClassifier.TYPE, new MessageClassifier.Factory());
+        registerFeatureSetFactory("message", new FeatureSet.MessageFeatureSetFactory());
+    }
 
     private static ClassifierManager instance = null;
 
     //type-safe map of classification execution contexts keyed by their parameterized types
-    private Map<Class<? extends Classifiable>, ClassificationExecutionContext<? extends Classifiable>> executionContextCache;
+    private Map<Class<? extends Classifiable>, ClassificationExecutionContext<? extends Classifiable, ? extends Classification>> executionContextCache;
 
     private ClassifierManager() throws ServiceException {
         this(new LdapClassifierRegistry());
@@ -57,6 +62,22 @@ public class ClassifierManager {
         this.registry  = registry;
     }
 
+    public static void registerClassifierFactory(String classifierType, AbstractClassifier.Factory<?,?> factory) {
+        classifierFctories.put(classifierType, factory);
+    }
+
+    public static void registerFeatureSetFactory(String featureSetType, FeatureSet.Factory<?> factory) {
+        featureSetFactories.put(featureSetType, factory);
+    }
+
+    public static AbstractClassifier.Factory<?,?> getClassifierFactory(String classifierType) {
+        return classifierFctories.get(classifierType);
+    }
+
+    public static FeatureSet.Factory<?> getFeatureSetFactory(String featureSetType) {
+        return featureSetFactories.get(featureSetType);
+    }
+
     public static synchronized ClassifierManager getInstance() throws ServiceException {
         if (instance == null) {
             instance = new ClassifierManager();
@@ -65,14 +86,14 @@ public class ClassifierManager {
 
     }
 
-    private <T extends Classifiable> void storeExecutionContext(Class<T> key, ClassificationExecutionContext<T> context) {
+    private <T extends Classifiable, R extends Classification> void storeExecutionContext(Class<T> key, ClassificationExecutionContext<T, R> context) {
         executionContextCache.put(key, context);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Classifiable> ClassificationExecutionContext<T> getExecutionContext(T item) throws ServiceException {
+    public <T extends Classifiable, R extends Classification> ClassificationExecutionContext<T, R> getExecutionContext(T item) throws ServiceException {
         Class<T> klass = (Class<T>) item.getClass();
-        ClassificationExecutionContext<T> context = (ClassificationExecutionContext<T>) executionContextCache.get(klass);
+        ClassificationExecutionContext<T, R> context = (ClassificationExecutionContext<T, R>) executionContextCache.get(klass);
         if (context == null) {
             context = resolveConfig(new LdapClassificationTaskConfigProvider());
             storeExecutionContext(klass, context);
@@ -87,7 +108,7 @@ public class ClassifierManager {
     /**
      * Register a known {@link MachineLearningTask} with the classifier system.
      */
-    public <T extends Classifiable> void registerClassificationTask(ClassificationTask<T> task) throws ServiceException {
+    public <T extends Classifiable, R extends Classification> void registerClassificationTask(ClassificationTask<T, R> task) throws ServiceException {
         String taskName = task.getTaskName();
         if (taskNameMap.containsKey(taskName)) {
             throw ServiceException.FAILURE(String.format("Classification task with name \"%s\" already exists", taskName), null);
@@ -107,32 +128,33 @@ public class ClassifierManager {
      * Return a {@link ClassificationExecutionContext} for the given classification configuration.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Classifiable> ClassificationExecutionContext<T> resolveConfig(ClassificationTaskConfigProvider configProvider) throws ServiceException {
+    @VisibleForTesting
+    <T extends Classifiable, R extends Classification> ClassificationExecutionContext<T, R> resolveConfig(ClassificationTaskConfigProvider configProvider) throws ServiceException {
         //TODO: this is OK while only Message implements Classifiable, this method uses unsafe casts.
         //Need to figure out how to get the execution context for a specific Classifiable type.
         Set<String> resolvedTasks = new HashSet<>();
-        ClassificationExecutionContext<T> context = new ClassificationExecutionContext<T>();
+        ClassificationExecutionContext<T, R> context = new ClassificationExecutionContext<T, R>();
         Map<String, TaskConfig> configMap = configProvider.getConfigMap();
         for (Map.Entry<String, TaskConfig> configEntry: configMap.entrySet()) {
             String taskName = configEntry.getKey();
             TaskConfig config = configEntry.getValue();
             String classifierLabel = config.getClassifierLabel();
-            Classifier<T> classifier = null;
+            AbstractClassifier<T, R> classifier = null;
             if (!taskNameMap.containsKey(taskName)) {
                 ZimbraLog.ml.warn("classification config references non-existent classification task \"%s\"", taskName);
                 continue;
             }
             try {
-                classifier = (Classifier<T>) getClassifierByLabel(classifierLabel);
+                classifier = (AbstractClassifier<T, R>) getClassifierByLabel(classifierLabel);
             } catch (ServiceException e) {
                 ZimbraLog.ml.warn("unable to locate classifier \"%s\" to use for classification task '%s'", classifierLabel, taskName);
                 continue;
             }
-            ClassificationTask<T> task = (ClassificationTask<T>) taskNameMap.get(taskName);
+            ClassificationTask<T, R> task = (ClassificationTask<T, R>) taskNameMap.get(taskName);
             context.addClassifierForTask(task, classifier);
             try {
                 ClassificationCallback<?> callback = task.resolveCallback(classifier);
-                ClassificationHandler<T> handler = context.getHandler(classifier);
+                ClassificationHandler<T, R> handler = context.getHandler(classifier);
                 if (callback instanceof OverlappingClassCallback<?>) {
                     OverlappingClassCallback<T> ocCallback = (OverlappingClassCallback<T>) callback;
                     Float threshold = config.getThreshold();
@@ -165,12 +187,12 @@ public class ClassifierManager {
     /**
      * Retrieve known classification tasks
      */
-    public List<ClassificationTask<?>> getAllTasks() {
+    public List<ClassificationTask<?, ?>> getAllTasks() {
         return new ArrayList<>(taskNameMap.values());
     }
 
-    public ClassificationTask<?> getTaskByName(String taskName) throws ServiceException {
-        ClassificationTask<?> task = taskNameMap.get(taskName);
+    public ClassificationTask<?, ?> getTaskByName(String taskName) throws ServiceException {
+        ClassificationTask<?, ?> task = taskNameMap.get(taskName);
         if (task == null) {
             throw ServiceException.FAILURE(String.format("classification task \"%s\" not found", taskName), null);
         }
@@ -178,43 +200,24 @@ public class ClassifierManager {
     }
 
     /**
-     * return a map of registered classifiers keyed by the IDs. Used by the classifier registry
-     * to construct full {@link Classifier} instances
-     */
-    public Map<String, ClassifierInfo> getAllClassifierInfo() throws ServiceException {
-        Map<String, ClassifierInfo> infoMap = new HashMap<>();
-        ListClassifiersQuery query = new ListClassifiersQuery();
-        for (ClassifierInfo info: query.execute()) {
-            infoMap.put(info.getClassifierId(), info);
-        }
-        return infoMap;
-    }
-
-    /**
      * Register a new classifier. This initializes the associated {@link ClassifierSpec}
      * on the ML server, and stores information about the classifier in the classifier registry.
      */
-    public <T extends Classifiable> Classifier<T> registerClassifier(ClassifierData<T> classifierData) throws ServiceException {
+    public void registerClassifier(Classifier<?> classifier) throws ServiceException {
         // 1. Check that the label is not a duplicate
-        String label = classifierData.getLabel();
+        String label = classifier.getLabel();
         if (registry.labelExists(label)) {
             throw ServiceException.INVALID_REQUEST("classifier label '" + label + "' already exists", null);
         }
-        // 2. try to register the spec with the ML server. This returns an ID.
-        CreateClassifierQuery query = new CreateClassifierQuery(classifierData.getSpec());
-        ClassifierInfo info = query.execute();
-        Classifier<T> classifier = classifierData.create(info);
-        // 3. Register the classifier with the registry using this ID.
         registry.register(classifier);
-        return classifier;
     }
 
     /**
      * Return a Classifier for the given classifier ID.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Classifiable> Classifier<T> getClassifierById(String classifierId) throws ServiceException {
-        Classifier<T> classifier = (Classifier<T>) registry.getById(classifierId);
+    public <T extends Classifiable, R extends Classification> AbstractClassifier<T, R> getClassifierById(String classifierId) throws ServiceException {
+        AbstractClassifier<T, R> classifier = (AbstractClassifier<T, R>) registry.getById(classifierId);
         if (classifier == null) {
             throw ServiceException.NOT_FOUND("no classifier registered for ID " + classifierId, null);
         }
@@ -224,8 +227,8 @@ public class ClassifierManager {
     /**
      * Return a Classifier for the given classifier ID.
      */
-    public Classifier<?> getClassifierByLabel(String classifierLabel) throws ServiceException {
-        Classifier<?> classifier = registry.getByLabel(classifierLabel);
+    public AbstractClassifier<?,?> getClassifierByLabel(String classifierLabel) throws ServiceException {
+        AbstractClassifier<?,?> classifier = registry.getByLabel(classifierLabel);
         if (classifier == null) {
             throw ServiceException.NOT_FOUND("no classifier registered for label " + classifierLabel, null);
         }
@@ -235,26 +238,26 @@ public class ClassifierManager {
     /**
      * Get all known classifiers
      */
-    public Map<String, Classifier<?>> getAllClassifiers() throws ServiceException {
+    public Map<String, AbstractClassifier<?,?>> getAllClassifiers() throws ServiceException {
         return registry.getAllClassifiers();
     }
 
     /**
      * Delete a classifier from the ML server by its ID.
      */
-    public <T extends Classifiable> Classifier<T> deleteClassifier(String classifierId) throws ServiceException {
-        Classifier<T> toDelete = getClassifierById(classifierId);
+    public <T extends Classifiable, R extends Classification> AbstractClassifier<T, R> deleteClassifier(String classifierId) throws ServiceException {
+        AbstractClassifier<T,R> toDelete = getClassifierById(classifierId);
         //1. Remove any task assignments for this classifier
         ClassificationTaskConfigProvider taskConfig = new LdapClassificationTaskConfigProvider();
-        ClassificationExecutionContext<T> context = resolveConfig(taskConfig);
-        ClassifierUsageInfo<T> usage = context.getClassifierUsage(toDelete);
-        for (ClassificationTask<T> task: usage.getTasks()) {
+        ClassificationExecutionContext<T, R> context = resolveConfig(taskConfig);
+        ClassifierUsageInfo<T, R> usage = context.getClassifierUsage(toDelete);
+        for (ClassificationTask<T, R> task: usage.getTasks()) {
             ZimbraLog.ml.info("removing classifier %s from task %s", toDelete.getLabel(), task.getTaskName());
             taskConfig.clearAssignment(task.getTaskName());
         }
         //2. Delete the classifier from the ML backend
         new DeleteClassifierQuery(classifierId).execute();
-        Classifier<T> deleted = registry.delete(classifierId);
+        AbstractClassifier<T,R> deleted = registry.delete(classifierId);
         //3. Remove the classifier from the local registry
         if (deleted == null) {
             ZimbraLog.ml.warn("No classifier with id=%s found in classifier registry", classifierId);

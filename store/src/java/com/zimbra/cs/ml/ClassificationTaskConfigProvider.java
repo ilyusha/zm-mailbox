@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.Pair;
-import com.zimbra.cs.ml.classifier.Classifier;
+import com.zimbra.cs.ml.classifier.AbstractClassifier;
 import com.zimbra.cs.ml.classifier.ClassifierManager;
 
 public abstract class ClassificationTaskConfigProvider {
@@ -18,8 +18,8 @@ public abstract class ClassificationTaskConfigProvider {
      * Assign a classifier to a task with a given overlapping class threshold
      */
     @SuppressWarnings("unchecked")
-    public <C extends Classifiable> void assignClassifier(String taskName, Classifier<C> classifier, Float threshold) throws ServiceException {
-        ClassificationTask<C> task = (ClassificationTask<C>) ClassifierManager.getInstance().getTaskByName(taskName);
+    public <C extends Classifiable, R extends Classification> void assignClassifier(String taskName, AbstractClassifier<C, R> classifier, Float threshold) throws ServiceException {
+        ClassificationTask<C, R> task = (ClassificationTask<C, R>) ClassifierManager.getInstance().getTaskByName(taskName);
         if (!task.supportsClassifier(classifier)) {
             throw ServiceException.FAILURE(String.format("classifier \"%s\" cannot be assigned to task \"%s\"", classifier.getLabel(), taskName), null);
         }
@@ -29,7 +29,7 @@ public abstract class ClassificationTaskConfigProvider {
     /**
      * Assign a classifier to a task
      */
-    public <C extends Classifiable> void assignClassifier(String taskName, Classifier<C> classifier) throws ServiceException {
+    public <C extends Classifiable, R extends Classification> void assignClassifier(String taskName, AbstractClassifier<C, R> classifier) throws ServiceException {
         assignClassifier(taskName, classifier, null);
     }
 

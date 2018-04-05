@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.zimbra.common.service.ServiceException;
-import com.zimbra.cs.ml.classifier.Classifier;
+import com.zimbra.cs.ml.classifier.AbstractClassifier;
 
 /**
  * This class is a bridge between the mailbox and the classification system.
@@ -15,8 +15,8 @@ import com.zimbra.cs.ml.classifier.Classifier;
  * This abstracts away the details of which classifiers are invoked, as there may not be a one-to-one
  * correspondence between tasks and classifiers.
  */
-public class ClassificationExecutionContext<C extends Classifiable> {
-    private Map<String, ClassifierUsageInfo<C>> classifierMap;
+public class ClassificationExecutionContext<C extends Classifiable, R extends Classification> {
+    private Map<String, ClassifierUsageInfo<C, R>> classifierMap;
 
     public ClassificationExecutionContext() {
         classifierMap = new HashMap<>();
@@ -25,8 +25,8 @@ public class ClassificationExecutionContext<C extends Classifiable> {
     /**
      * Link a {@link ClassificationTask} to a {@link Classifier}
      */
-    public void addClassifierForTask(ClassificationTask<C> task, Classifier<C> classifier) {
-        ClassifierUsageInfo<C> usageInfo = classifierMap.get(classifier.getId());
+    public void addClassifierForTask(ClassificationTask<C, R> task, AbstractClassifier<C, R> classifier) {
+        ClassifierUsageInfo<C, R> usageInfo = classifierMap.get(classifier.getId());
         if (usageInfo == null) {
             usageInfo = new ClassifierUsageInfo<>(classifier);
             classifierMap.put(classifier.getId(), usageInfo);
@@ -38,32 +38,32 @@ public class ClassificationExecutionContext<C extends Classifiable> {
      * Invoke each classifier and handle the classification output accordingly.
      */
     public void execute(C item) throws ServiceException {
-        for (ClassifierUsageInfo<C> info: classifierMap.values()) {
-            ClassificationHandler<C> handler = info.getHandler();
-            handler.handle(item, info.getClassifier().classify(item));
+        for (ClassifierUsageInfo<C, R> info: classifierMap.values()) {
+            ClassificationHandler<C, R> handler = info.getHandler();
+            handler.handle(item, info.getClassifier().classifyItem(item));
         }
     }
 
     /**
      * Get the {@link ClassificationHandler} for the given classifier
      */
-    public ClassificationHandler<C> getHandler(Classifier<C> classifier) {
-        ClassifierUsageInfo<C> info = classifierMap.get(classifier.getId());
+    public ClassificationHandler<C, R> getHandler(AbstractClassifier<C, R> classifier) {
+        ClassifierUsageInfo<C, R> info = classifierMap.get(classifier.getId());
         return info == null ? null : info.getHandler();
     }
 
     /**
      * Return a list of all {@link ClassifierUsageInfo} for this execution context
      */
-    public List<ClassifierUsageInfo<C>> getInfo() {
-        return new ArrayList<ClassifierUsageInfo<C>>(classifierMap.values());
+    public List<ClassifierUsageInfo<C, R>> getInfo() {
+        return new ArrayList<ClassifierUsageInfo<C, R>>(classifierMap.values());
     }
 
     /**
      * Return the {@link ClassifierUsageInfo} for the given classifier for this execution context
      */
-    public ClassifierUsageInfo<C> getClassifierUsage(Classifier<C> classifier) {
-        return classifierMap.containsKey(classifier.getId()) ? classifierMap.get(classifier.getId()) : new ClassifierUsageInfo<C>(classifier);
+    public ClassifierUsageInfo<C, R> getClassifierUsage(AbstractClassifier<C, R> classifier) {
+        return classifierMap.containsKey(classifier.getId()) ? classifierMap.get(classifier.getId()) : new ClassifierUsageInfo<C, R>(classifier);
     }
 
     /**
@@ -73,30 +73,30 @@ public class ClassificationExecutionContext<C extends Classifiable> {
         return !classifierMap.isEmpty();
     }
 
-    public static class ClassifierUsageInfo<C extends Classifiable> {
-        private Classifier<C> classifier;
-        private ClassificationHandler<C> handler;
-        private List<ClassificationTask<C>> tasks;
+    public static class ClassifierUsageInfo<C extends Classifiable, R extends Classification> {
+        private AbstractClassifier<C, R> classifier;
+        private ClassificationHandler<C, R> handler;
+        private List<ClassificationTask<C, R>> tasks;
 
-        ClassifierUsageInfo(Classifier<C> classifier) {
+        ClassifierUsageInfo(AbstractClassifier<C, R> classifier) {
             this.classifier = classifier;
             this.handler = new ClassificationHandler<>();
             this.tasks = new ArrayList<>();
         }
 
-        public Classifier<C> getClassifier() {
+        public AbstractClassifier<C, R> getClassifier() {
             return classifier;
         }
 
-        public ClassificationHandler<C> getHandler() {
+        public ClassificationHandler<C, R> getHandler() {
             return handler;
         }
 
-        public void addTask(ClassificationTask<C> task) {
+        public void addTask(ClassificationTask<C, R> task) {
             tasks.add(task);
         }
 
-        public List<ClassificationTask<C>> getTasks() {
+        public List<ClassificationTask<C, R>> getTasks() {
             return tasks;
         }
     }

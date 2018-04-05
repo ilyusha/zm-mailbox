@@ -1,6 +1,7 @@
 package com.zimbra.cs.ml.query;
 
 import com.zimbra.cs.mailbox.Message;
+import com.zimbra.cs.ml.schema.ClassificationResult;
 import com.zimbra.cs.ml.schema.MessageClassificationInput;
 
 public class MessageClassificationQuery extends AbstractClassificationQuery<Message> {

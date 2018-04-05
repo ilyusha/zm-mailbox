@@ -1,6 +1,7 @@
 package com.zimbra.cs.ml.feature;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Objects;
@@ -193,5 +194,18 @@ public class FeatureSpec<T extends Classifiable> {
         return Objects.toStringHelper(this)
                 .add("feature", feature)
                 .add("params", otherParams).toString();
+    }
+
+    public static class EncodedFeatureSpecs {
+        private String type;
+        private List<String> encodedFeatureSpecs;
+
+        public EncodedFeatureSpecs(String type, List<String> encodedFeatureSpecs) {
+            this.type = type;
+            this.encodedFeatureSpecs = encodedFeatureSpecs;
+        }
+
+        public String getType() { return type; }
+        public List<String> getEncodedSpecs() { return encodedFeatureSpecs; }
     }
 }

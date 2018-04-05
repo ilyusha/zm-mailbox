@@ -1,5 +1,6 @@
 package com.zimbra.cs.ml.classifier;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,12 +10,11 @@ import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.BEncoding;
 import com.zimbra.common.util.BEncoding.BEncodingException;
 import com.zimbra.common.util.ZimbraLog;
-import com.zimbra.cs.mailbox.Message;
 import com.zimbra.cs.ml.Classifiable;
-import com.zimbra.cs.ml.classifier.Classifier.ClassifiableType;
-import com.zimbra.cs.ml.feature.FeatureSet;
+import com.zimbra.cs.ml.Classification;
+import com.zimbra.cs.ml.classifier.AbstractClassifier.ClassifierConfig;
 import com.zimbra.cs.ml.feature.FeatureSpec;
-import com.zimbra.cs.ml.schema.ClassifierInfo;
+import com.zimbra.cs.ml.feature.FeatureSpec.EncodedFeatureSpecs;
 
 /**
  * Registry of classifiers known to be initialized on the ML server.
@@ -26,10 +26,13 @@ public abstract class ClassifierRegistry {
     private static final String KEY_LABEL = "l";
     private static final String KEY_FEATURES = "f";
     private static final String KEY_DESCRIPTION = "d";
-    private static final String KEY_TYPE = "t";
+    private static final String KEY_CLASSIFIER_TYPE = "t";
+    private static final String KEY_CLASSIFIABLE_TYPE = "c";
+    private static final String KEY_OVERLAPPING_CLASSES = "oc";
+    private static final String KEY_EXCLUSIVE_CLASSES = "ec";
 
-    private Map<String, Classifier<?>> idMap;
-    private Map<String, Classifier<?>> labelMap;
+    private Map<String, AbstractClassifier<?,?>> idMap;
+    private Map<String, AbstractClassifier<?,?>> labelMap;
     private boolean loaded = false;
 
     public ClassifierRegistry() {
@@ -40,32 +43,16 @@ public abstract class ClassifierRegistry {
     private synchronized void loadKnownClassifiers() throws ServiceException {
         String[] encodedClassifiers = load();
         ZimbraLog.ml.info("found known %d classifiers in %s", encodedClassifiers.length, this.getClass().getSimpleName());
-        Map<String, ClassifierInfo> infoMap = ClassifierManager.getInstance().getAllClassifierInfo();
-        ZimbraLog.ml.debug("found %d classifiers registered with ML backend", infoMap.size());
         for (String encoded: encodedClassifiers) {
-            Classifier<?> decoded = decode(encoded);
+            AbstractClassifier<?, ?> decoded = decode(encoded);
             String id = decoded.getId();
-            ClassifierInfo info = infoMap.get(id);
-            if (info == null) {
-                ZimbraLog.ml.warn("known classifier %s (id=%s) has no entry in ML backend, deleting", decoded.getLabel(), id);
-                deRegister(encoded);
-            } else {
-                ZimbraLog.ml.debug("loaded classifier label=%s id=%s", decoded.getLabel(), id);
-                infoMap.remove(id);
-                idMap.put(id, decoded);
-                labelMap.put(decoded.getLabel(), decoded);
-                decoded.setClassifierInfo(info);
-            }
-        }
-        if (!infoMap.isEmpty()) {
-            for (String cId: infoMap.keySet()) {
-                ZimbraLog.ml.warn("classifier id=%s has no corresponding entry in %s", cId, this.getClass().getSimpleName());
-            }
+            idMap.put(id, decoded);
+            labelMap.put(decoded.getLabel(), decoded);
         }
         loaded = true;
     }
 
-    public Map<String, Classifier<?>> getAllClassifiers() throws ServiceException {
+    public Map<String, AbstractClassifier<?,?>> getAllClassifiers() throws ServiceException {
         if (!loaded) {
             loadKnownClassifiers();
         }
@@ -92,7 +79,7 @@ public abstract class ClassifierRegistry {
     /**
      * Register a classifier
      */
-    public void register(Classifier<?> classifier) throws ServiceException {
+    public void register(AbstractClassifier<?,?> classifier) throws ServiceException {
         if (!loaded) {
             loadKnownClassifiers();
         }
@@ -104,64 +91,46 @@ public abstract class ClassifierRegistry {
         save(encode(classifier));
     }
 
-    protected String encode(Classifier<?> classifier) {
+    protected String encode(AbstractClassifier<?,?> classifier) {
         Map<String, Object> map = new HashMap<>();
         map.put(KEY_ID, classifier.getId());
-        map.put(KEY_TYPE, classifier.getType().name());
+        map.put(KEY_CLASSIFIER_TYPE, classifier.getClassifierType());
+        map.put(KEY_CLASSIFIABLE_TYPE, classifier.getFeatureSetType());
         map.put(KEY_LABEL, classifier.getLabel());
         map.put(KEY_FEATURES, classifier.getFeatureSet().getAllFeatureSpecs().stream().map(feature -> ((FeatureSpec<?>) feature).encode()).collect(Collectors.toList()));
         map.put(KEY_DESCRIPTION, classifier.getDescription());
+        map.put(KEY_EXCLUSIVE_CLASSES, Arrays.asList(classifier.getExclusiveClasses()));
+        map.put(KEY_OVERLAPPING_CLASSES, Arrays.asList(classifier.getOverlappingClasses()));
         return BEncoding.encode(map);
     }
 
-    protected Classifier<?> decode(String encoded) throws ServiceException {
+    @SuppressWarnings("unchecked")
+    protected AbstractClassifier<?, ?> decode(String encoded) throws ServiceException {
         Map<String, Object> map;
         try {
             map = BEncoding.decode(encoded);
         } catch (BEncodingException e) {
             throw ServiceException.FAILURE("unable to decode classifier with encoded value %s" + encoded, null);
         }
-        if (!map.containsKey(KEY_TYPE)) {
-            throw ServiceException.FAILURE("no ClassifiableType value found during decoding classifier", null);
-
+        if (!map.containsKey(KEY_CLASSIFIER_TYPE)) {
+            throw ServiceException.FAILURE("no classifier type value found during decoding classifier", null);
         }
-        String typeStr = (String) map.get(KEY_TYPE);
-        ClassifiableType type = null;
-        try {
-            type = ClassifiableType.valueOf(typeStr);
-        } catch (IllegalArgumentException e) {
-            throw ServiceException.FAILURE("invalid ClassifiableType value encountered during decoding classifier: " + typeStr, null);
-        }
-        //this may seem unnecessary now, but it allows us to add classifiers for things other than messages in the future
-        switch (type) {
-        case MESSAGE:
-            return decodeMessageClassifier(map);
-        default:
-            throw ServiceException.FAILURE(String.format("unknown ClassifiableType %s; only MESSAGE is supported at this time", type), null);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Classifier<Message> decodeMessageClassifier(Map<String, Object> map) throws ServiceException {
+        String classifierType = (String) map.get(KEY_CLASSIFIER_TYPE);
         String label = (String) map.get(KEY_LABEL);
         String id = (String) map.get(KEY_ID);
         String description = map.containsKey(KEY_DESCRIPTION) ? (String) map.get(KEY_DESCRIPTION) : null;
-        FeatureSet<Message> featureSet = new FeatureSet<>();
-        for (String encodedFeatureSpec: (List<String>) map.get(KEY_FEATURES)) {
-            try {
-                featureSet.addFeatureSpec(new FeatureSpec<Message>(encodedFeatureSpec));
-            } catch (ServiceException e) {
-                ZimbraLog.ml.warn("problem decoding feature for classifier %s", label, e);
-            }
-        }
-        Classifier<Message> classifier = new MessageClassifier(id, label, featureSet);
-        if (description != null) {
-            classifier.setDescription(description);
-        }
+        String featureSetType = (String) map.get(KEY_CLASSIFIABLE_TYPE);
+        List<String> overlappingClasses = (List<String>) map.get(KEY_OVERLAPPING_CLASSES);
+        List<String> exclusiveClasses = (List<String>) map.get(KEY_EXCLUSIVE_CLASSES);
+        List<String> encodedFeatures = (List<String>) map.get(KEY_FEATURES);
+        EncodedFeatureSpecs encodedFeatureSpecs = new EncodedFeatureSpecs(featureSetType, encodedFeatures);
+        AbstractClassifier.Factory<?, ?> classifierFactory = ClassifierManager.getClassifierFactory(classifierType);
+        ClassifierConfig config = new ClassifierConfig(label, description, exclusiveClasses, overlappingClasses);
+        AbstractClassifier<?, ?> classifier = classifierFactory.getClassifier(id, config, encodedFeatureSpecs);
         return classifier;
     }
 
-    public Classifier<?> getById(String classifierId) throws ServiceException {
+    public AbstractClassifier<?,?> getById(String classifierId) throws ServiceException {
         if (!loaded) {
             loadKnownClassifiers();
         }
@@ -171,7 +140,7 @@ public abstract class ClassifierRegistry {
         return idMap.get(classifierId);
     }
 
-    public Classifier<?> getByLabel(String classifierLabel) throws ServiceException {
+    public AbstractClassifier<?,?> getByLabel(String classifierLabel) throws ServiceException {
         if (!loaded) {
             loadKnownClassifiers();
         }
@@ -182,11 +151,11 @@ public abstract class ClassifierRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Classifiable> Classifier<T> delete(String classifierId) throws ServiceException {
+    public <T extends Classifiable, R extends Classification> AbstractClassifier<T, R> delete(String classifierId) throws ServiceException {
         if (!loaded) {
             loadKnownClassifiers();
         }
-        Classifier<T> classifier = (Classifier<T>) idMap.remove(classifierId);
+        AbstractClassifier<T,R> classifier = (AbstractClassifier<T,R>) idMap.remove(classifierId);
         if (classifier != null) {
             deRegister(encode(classifier));
             labelMap.remove(classifier.getLabel());

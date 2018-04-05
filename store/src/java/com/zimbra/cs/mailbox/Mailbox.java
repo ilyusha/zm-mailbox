@@ -171,6 +171,7 @@ import com.zimbra.cs.mime.ParsedMessage;
 import com.zimbra.cs.mime.ParsedMessage.CalendarPartInfo;
 import com.zimbra.cs.mime.ParsedMessageDataSource;
 import com.zimbra.cs.mime.ParsedMessageOptions;
+import com.zimbra.cs.ml.Classification;
 import com.zimbra.cs.ml.ClassificationExecutionContext;
 import com.zimbra.cs.ml.classifier.ClassifierManager;
 import com.zimbra.cs.pop3.Pop3Message;
@@ -10811,7 +10812,7 @@ public class Mailbox implements MailboxStore {
                 }
             }
             try {
-                ClassificationExecutionContext<Message> executionContext = ClassifierManager.getInstance().getExecutionContext(msg);
+                ClassificationExecutionContext<Message, Classification> executionContext = ClassifierManager.getInstance().getExecutionContext(msg);
                 if (executionContext.hasResolvedTasks()) {
                     executionContext.execute(msg);
                 }
